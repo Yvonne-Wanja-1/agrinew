@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -50,19 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB41VZNWwB-Wjvs8pSCNmx_pB1D4lmR-fU',
-    appId: '1:390433005874:android:b0eace665d9649f6c4b72b',
-    messagingSenderId: '390433005874',
-    projectId: 'final-9bc5c',
-    storageBucket: 'final-9bc5c.firebasestorage.app',
+    apiKey: 'AIzaSyCdpdMv6kqKKalmyIuqq_gHFVPinFVKzHQ',
+    appId: '1:591444926690:android:4b316e6ad8907904e7febb',
+    messagingSenderId: '591444926690',
+    projectId: 'agriclinichub',
+    storageBucket: 'agriclinichub.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDUE66D4y4uQsMhQjyyhlnWp0um95SxMP8',
-    appId: '1:390433005874:ios:57a9fb746792c0a4c4b72b',
-    messagingSenderId: '390433005874',
-    projectId: 'final-9bc5c',
-    storageBucket: 'final-9bc5c.firebasestorage.app',
-    iosBundleId: 'com.example.flutterauth',
+    apiKey: 'AIzaSyC1hnZ9FtHZCgWRy7QRj7jH5NJP5NK3-u8',
+    appId: '1:591444926690:ios:97ba11329bc84895e7febb',
+    messagingSenderId: '591444926690',
+    projectId: 'agriclinichub',
+    storageBucket: 'agriclinichub.firebasestorage.app',
+    iosBundleId: 'com.example.agriclinichubNew',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyALu4-McRdODuq9Kx2L-1L8gCQ103zpRQI',
+    appId: '1:591444926690:web:762feab32d194333e7febb',
+    messagingSenderId: '591444926690',
+    projectId: 'agriclinichub',
+    authDomain: 'agriclinichub.firebaseapp.com',
+    storageBucket: 'agriclinichub.firebasestorage.app',
+    measurementId: 'G-GPLDLDM68B',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyC1hnZ9FtHZCgWRy7QRj7jH5NJP5NK3-u8',
+    appId: '1:591444926690:ios:97ba11329bc84895e7febb',
+    messagingSenderId: '591444926690',
+    projectId: 'agriclinichub',
+    storageBucket: 'agriclinichub.firebasestorage.app',
+    iosBundleId: 'com.example.agriclinichubNew',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyALu4-McRdODuq9Kx2L-1L8gCQ103zpRQI',
+    appId: '1:591444926690:web:7cfd5d2c04d08e1be7febb',
+    messagingSenderId: '591444926690',
+    projectId: 'agriclinichub',
+    authDomain: 'agriclinichub.firebaseapp.com',
+    storageBucket: 'agriclinichub.firebasestorage.app',
+    measurementId: 'G-S1K5X0FQWT',
+  );
+
 }

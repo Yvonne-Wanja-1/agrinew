@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:agriclinichub_new/core/services/auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -30,20 +30,14 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  // Fix this signup flow using FirebaseAuth:
-  // - Await createUserWithEmailAndPassword properly
-  // - Navigate ONLY after successful signup
-  // - Do not treat post-signup logic as failure
-  // - Catch FirebaseAuthException separately
-  // - Handle email-already-in-use correctly
-  // - Do not create the user twice
-  // - Prevent duplicate signup calls if function is already running
-  // - Add debugPrint logs for debugging
+  /// Sign up with email and password using AuthService
+  /// - Uses Firebase Auth only (no database)
+  /// - Handles errors properly
+  /// - Prevents duplicate signup calls
   Future<void> _handleSignup() async {
-    // Add debugPrint logs: Log when signup starts
     debugPrint('🟢 [SIGNUP] Signup attempt started');
 
-    // Prevent duplicate signup calls if function is already running
+    // Prevent duplicate signup calls
     if (_isSignupInProgress) {
       debugPrint(
         '🟡 [SIGNUP] Signup already in progress, ignoring duplicate call',
@@ -56,7 +50,6 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    // Guard against duplicate calls
     _isSignupInProgress = true;
     setState(() => _isLoading = true);
 
@@ -66,26 +59,19 @@ class _SignupScreenState extends State<SignupScreen> {
 
       debugPrint('🟢 [SIGNUP] Attempting to create user with email: $email');
 
-      // Await createUserWithEmailAndPassword properly
-      final userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
+      // Use AuthService for Firebase Auth
+      await AuthService.signUpWithEmail(email: email, password: password);
 
-      debugPrint(
-        '✅ [SIGNUP] User created successfully: ${userCredential.user?.uid}',
-      );
+      debugPrint('✅ [SIGNUP] User created successfully');
 
-      // Log when signup succeeds
       if (mounted) {
         debugPrint('🟢 [SIGNUP] Navigating to home screen');
-        // Navigate ONLY after successful signup
         Navigator.of(context).pushReplacementNamed('/home');
       }
     } on FirebaseAuthException catch (e) {
       debugPrint('🔴 [SIGNUP] FirebaseAuthException: ${e.code} - ${e.message}');
 
-      // Catch FirebaseAuthException separately
       if (mounted) {
-        // Improve error handling: Map common error codes to user-friendly messages
         String errorMessage = 'Signup failed';
 
         switch (e.code) {
@@ -108,7 +94,6 @@ class _SignupScreenState extends State<SignupScreen> {
             errorMessage = 'Signup failed: ${e.message}';
         }
 
-        // Show FirebaseAuthException messages without fake errors
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -129,7 +114,6 @@ class _SignupScreenState extends State<SignupScreen> {
       }
     } finally {
       if (mounted) {
-        // Reset loading state and signup guard
         _isSignupInProgress = false;
         setState(() => _isLoading = false);
         debugPrint('🟢 [SIGNUP] Signup flow completed, state reset');
@@ -137,42 +121,14 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  /// Sign up with Google using AuthService
   Future<void> _handleGoogleSignUp() async {
     setState(() => _isLoading = true);
     try {
       debugPrint('🟢 [GOOGLE_SIGNUP] Starting Google Sign-Up');
 
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-      );
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-
-      if (googleUser == null) {
-        debugPrint('🟡 [GOOGLE_SIGNUP] User cancelled Google Sign-In');
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      debugPrint(
-        '🟢 [GOOGLE_SIGNUP] Google user signed in: ${googleUser.email}',
-      );
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
-        throw Exception('Failed to get Google authentication tokens');
-      }
-
-      debugPrint('🟢 [GOOGLE_SIGNUP] Creating Firebase credential');
-
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken!,
-        idToken: googleAuth.idToken,
-      );
-
-      debugPrint('🟢 [GOOGLE_SIGNUP] Signing in with Firebase');
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      // Use AuthService for Google sign-in
+      await AuthService.signInWithGoogle();
 
       debugPrint('✅ [GOOGLE_SIGNUP] Successfully signed in with Google');
 

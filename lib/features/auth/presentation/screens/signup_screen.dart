@@ -60,13 +60,22 @@ class _SignupScreenState extends State<SignupScreen> {
       debugPrint('🟢 [SIGNUP] Attempting to create user with email: $email');
 
       // Use AuthService for Firebase Auth
-      await AuthService.signUpWithEmail(email: email, password: password);
+      final credential = await AuthService.signUpWithEmail(
+        email: email,
+        password: password,
+      );
 
       debugPrint('✅ [SIGNUP] User created successfully');
 
       if (mounted) {
-        debugPrint('🟢 [SIGNUP] Navigating to home screen');
-        Navigator.of(context).pushReplacementNamed('/home');
+        debugPrint('🟢 [SIGNUP] Navigating to email verification screen');
+        Navigator.of(context).pushReplacementNamed(
+          '/email-verification',
+          arguments: {
+            'user': credential.user,
+            'email': credential.user?.email ?? '',
+          },
+        );
       }
     } on FirebaseAuthException catch (e) {
       debugPrint('🔴 [SIGNUP] FirebaseAuthException: ${e.code} - ${e.message}');
@@ -128,12 +137,19 @@ class _SignupScreenState extends State<SignupScreen> {
       debugPrint('🟢 [GOOGLE_SIGNUP] Starting Google Sign-Up');
 
       // Use AuthService for Google sign-in
-      await AuthService.signInWithGoogle();
+      final credential = await AuthService.signInWithGoogle();
 
       debugPrint('✅ [GOOGLE_SIGNUP] Successfully signed in with Google');
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        // Navigate to email verification instead of home
+        Navigator.of(context).pushReplacementNamed(
+          '/email-verification',
+          arguments: {
+            'user': credential.user,
+            'email': credential.user?.email ?? '',
+          },
+        );
       }
     } on FirebaseAuthException catch (e) {
       debugPrint(

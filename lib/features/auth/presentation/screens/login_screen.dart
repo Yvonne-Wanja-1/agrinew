@@ -27,12 +27,19 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       try {
-        await AuthService.loginWithEmail(
+        final credential = await AuthService.loginWithEmail(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/home');
+          // Navigate to email verification instead of home
+          Navigator.of(context).pushReplacementNamed(
+            '/email-verification',
+            arguments: {
+              'user': credential.user,
+              'email': credential.user?.email ?? '',
+            },
+          );
         }
       } on FirebaseAuthException catch (e) {
         if (mounted) {
@@ -51,10 +58,17 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isLoading = true);
     try {
-      await AuthService.signInWithGoogle();
+      final credential = await AuthService.signInWithGoogle();
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        // Navigate to email verification instead of home
+        Navigator.of(context).pushReplacementNamed(
+          '/email-verification',
+          arguments: {
+            'user': credential.user,
+            'email': credential.user?.email ?? '',
+          },
+        );
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {

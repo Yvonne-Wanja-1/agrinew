@@ -3,6 +3,8 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/auth/presentation/screens/delete_account_screen.dart';
+import '../../features/auth/presentation/screens/email_verification_screen.dart';
+import '../../features/auth/presentation/screens/phone_verification_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/disease_detection/presentation/screens/scan_screen.dart';
 import '../../features/disease_detection/presentation/screens/scan_result_screen.dart';
@@ -22,6 +24,8 @@ class AppRouter {
   static const String splash = '/';
   static const String login = '/login';
   static const String signup = '/signup';
+  static const String emailVerification = '/email-verification';
+  static const String phoneVerification = '/phone-verification';
   static const String deleteAccount = '/delete-account';
   static const String home = '/home';
   static const String scan = '/scan';
@@ -45,6 +49,20 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case AppRouter.signup:
         return MaterialPageRoute(builder: (_) => const SignupScreen());
+      case AppRouter.emailVerification:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => EmailVerificationScreen(
+            user: args?['user'],
+            email: args?['email'] ?? '',
+          ),
+        );
+      case AppRouter.phoneVerification:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) =>
+              PhoneVerificationScreen(phoneNumber: args?['phoneNumber']),
+        );
       case AppRouter.deleteAccount:
         return MaterialPageRoute(builder: (_) => const DeleteAccountScreen());
       case AppRouter.home:

@@ -63,14 +63,82 @@ class SettingsService extends ChangeNotifier {
         brightness: Brightness.dark,
       ),
       scaffoldBackgroundColor: const Color(0xFF121212),
+      canvasColor: const Color(0xFF1E1E1E),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.grey.shade900,
         foregroundColor: Colors.white,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        centerTitle: false,
       ),
-      cardTheme: CardThemeData(color: Colors.grey.shade800, elevation: 1),
+      cardTheme: CardThemeData(
+        color: Colors.grey.shade800,
+        elevation: 1,
+        shadowColor: Colors.black.withOpacity(0.3),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: Colors.grey.shade900,
+        selectedItemColor: Colors.green.shade400,
+        unselectedItemColor: Colors.white54,
+        elevation: 8,
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: Colors.green.shade600,
+        foregroundColor: Colors.white,
+      ),
+      buttonTheme: ButtonThemeData(
+        buttonColor: Colors.green.shade600,
+        textTheme: ButtonTextTheme.primary,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green.shade600,
+          foregroundColor: Colors.white,
+          surfaceTintColor: Colors.green.shade600,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.white,
+          side: BorderSide(color: Colors.green.shade600),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: Colors.green.shade400),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.grey.shade800,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey.shade700),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey.shade700),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.green.shade400),
+        ),
+        labelStyle: const TextStyle(color: Colors.white70),
+        hintStyle: const TextStyle(color: Colors.white30),
+        prefixIconColor: Colors.white54,
+        suffixIconColor: Colors.white54,
+      ),
       textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+        displayMedium: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+        displaySmall: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
         headlineLarge: TextStyle(color: Colors.white),
         headlineMedium: TextStyle(color: Colors.white),
         headlineSmall: TextStyle(color: Colors.white),
@@ -86,6 +154,16 @@ class SettingsService extends ChangeNotifier {
       ),
       iconTheme: const IconThemeData(color: Colors.white70),
       dividerColor: Colors.grey.shade700,
+      dialogBackgroundColor: Colors.grey.shade900,
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: Colors.grey.shade800,
+        contentTextStyle: const TextStyle(color: Colors.white),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.grey.shade800,
+        labelStyle: const TextStyle(color: Colors.white),
+        side: BorderSide(color: Colors.grey.shade700),
+      ),
     );
   }
 
@@ -99,14 +177,82 @@ class SettingsService extends ChangeNotifier {
         brightness: Brightness.light,
       ),
       scaffoldBackgroundColor: const Color(0xFFF5F9F5),
+      canvasColor: Colors.white,
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.green.shade400,
         foregroundColor: Colors.white,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        centerTitle: false,
       ),
-      cardTheme: CardThemeData(color: Colors.white, elevation: 2),
+      cardTheme: CardThemeData(
+        color: Colors.white,
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.1),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.green.shade600,
+        unselectedItemColor: Colors.grey.shade600,
+        elevation: 8,
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: Colors.green.shade600,
+        foregroundColor: Colors.white,
+      ),
+      buttonTheme: ButtonThemeData(
+        buttonColor: Colors.green.shade600,
+        textTheme: ButtonTextTheme.primary,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green.shade600,
+          foregroundColor: Colors.white,
+          surfaceTintColor: Colors.green.shade600,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.green.shade600,
+          side: BorderSide(color: Colors.green.shade600),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: Colors.green.shade600),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.grey.shade100,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: Colors.green.shade600),
+        ),
+        labelStyle: TextStyle(color: Colors.grey.shade700),
+        hintStyle: TextStyle(color: Colors.grey.shade400),
+        prefixIconColor: Colors.grey.shade600,
+        suffixIconColor: Colors.grey.shade600,
+      ),
       textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          color: Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
+        displayMedium: TextStyle(
+          color: Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
+        displaySmall: TextStyle(
+          color: Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
         headlineLarge: TextStyle(color: Colors.black87),
         headlineMedium: TextStyle(color: Colors.black87),
         headlineSmall: TextStyle(color: Colors.black87),
@@ -122,6 +268,16 @@ class SettingsService extends ChangeNotifier {
       ),
       iconTheme: const IconThemeData(color: Colors.black54),
       dividerColor: Colors.grey.shade300,
+      dialogBackgroundColor: Colors.white,
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: Colors.grey.shade900,
+        contentTextStyle: const TextStyle(color: Colors.white),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.grey.shade100,
+        labelStyle: const TextStyle(color: Colors.black87),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
     );
   }
 }

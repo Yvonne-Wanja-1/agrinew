@@ -117,10 +117,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: Colors.white.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: Icon(
-                                Icons.agriculture,
-                                size: 35,
-                                color: Colors.white,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: Image.asset(
+                                  'assets/images/logo.png',
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                           ),
@@ -180,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               prefixIcon: Icon(
                                 Icons.email,
-                                color: Colors.white70,
+                                color: Colors.lightBlue,
                               ),
                             ),
                             keyboardType: TextInputType.emailAddress,
@@ -226,16 +228,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                   color: Colors.white,
                                 ),
                               ),
-                              prefixIcon: Icon(
-                                Icons.lock,
-                                color: Colors.white70,
-                              ),
+                              prefixIcon: Icon(Icons.lock, color: Colors.red),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword
                                       ? Icons.visibility_off
                                       : Icons.visibility,
-                                  color: Colors.white70,
+                                  color: Colors.red,
                                 ),
                                 onPressed: () {
                                   setState(
@@ -272,6 +271,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 style: TextStyle(
                                   color: Colors.white70,
                                   fontSize: 12,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),

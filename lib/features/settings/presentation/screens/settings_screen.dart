@@ -51,10 +51,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.language,
                         color: Colors.green.shade600,
                       ),
-                      title: const Text('Language'),
+                      title: const Text(
+                        'Language',
+                        style: TextStyle(color: Colors.black),
+                      ),
                       subtitle: _selectedLanguage == 'en'
-                          ? const Text('English')
-                          : const Text('Kiswahili'),
+                          ? const Text(
+                              'English',
+                              style: TextStyle(color: Colors.black54),
+                            )
+                          : const Text(
+                              'Kiswahili',
+                              style: TextStyle(color: Colors.black54),
+                            ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: _showLanguageDialog,
                     ),
@@ -64,7 +73,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         _darkModeEnabled ? Icons.dark_mode : Icons.light_mode,
                         color: Colors.green.shade600,
                       ),
-                      title: const Text('Dark Mode'),
+                      title: const Text(
+                        'Dark Mode',
+                        style: TextStyle(color: Colors.black),
+                      ),
                       trailing: Switch(
                         value: _darkModeEnabled,
                         onChanged: (value) {
@@ -79,7 +91,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.notifications,
                         color: Colors.green.shade600,
                       ),
-                      title: const Text('Notifications'),
+                      title: const Text(
+                        'Notifications',
+                        style: TextStyle(color: Colors.black),
+                      ),
                       trailing: Switch(
                         value: _notificationsEnabled,
                         onChanged: (value) {
@@ -115,8 +130,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.storage,
                         color: Colors.green.shade600,
                       ),
-                      title: const Text('Cache Size'),
-                      subtitle: const Text('2.3 MB'),
+                      title: const Text(
+                        'Cache Size',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      subtitle: const Text(
+                        '2.3 MB',
+                        style: TextStyle(color: Colors.black54),
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -127,7 +148,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const Divider(height: 0),
                     ListTile(
                       leading: Icon(Icons.backup, color: Colors.green.shade600),
-                      title: const Text('Backup Data'),
+                      title: const Text(
+                        'Backup Data',
+                        style: TextStyle(color: Colors.black),
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -159,8 +183,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     ListTile(
                       leading: Icon(Icons.info, color: Colors.green.shade600),
-                      title: const Text('Version'),
-                      subtitle: const Text('1.0.0'),
+                      title: const Text(
+                        'Version',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      subtitle: const Text(
+                        '1.0.0',
+                        style: TextStyle(color: Colors.black54),
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                     ),
                     const Divider(height: 0),
@@ -169,7 +199,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.description,
                         color: Colors.green.shade600,
                       ),
-                      title: const Text('Privacy Policy'),
+                      title: const Text(
+                        'Privacy Policy',
+                        style: TextStyle(color: Colors.black),
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -185,7 +218,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Icons.assignment,
                         color: Colors.green.shade600,
                       ),
-                      title: const Text('Terms of Service'),
+                      title: const Text(
+                        'Terms of Service',
+                        style: TextStyle(color: Colors.black),
+                      ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(

@@ -119,7 +119,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.arrow_back, color: Colors.white),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: Colors.white70,
+                        size: 20,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -127,16 +131,16 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: Column(
                       children: [
                         Container(
-                          width: 80,
-                          height: 80,
+                          width: 60,
+                          height: 60,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Icon(
                             Icons.agriculture,
-                            size: 40,
-                            color: Colors.white,
+                            size: 28,
+                            color: Colors.lightGreen,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -433,8 +437,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                           icon: Image.asset(
                             'assets/images/google.png',
-                            width: 20,
-                            height: 20,
+                            width: 16,
+                            height: 16,
                           ),
                           label: Text(
                             'Google',
@@ -459,8 +463,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                           icon: Image.asset(
                             'assets/images/gmail.png',
-                            width: 20,
-                            height: 20,
+                            width: 16,
+                            height: 16,
                           ),
                           label: Text(
                             'Gmail',

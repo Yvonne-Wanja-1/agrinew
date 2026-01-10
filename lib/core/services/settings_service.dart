@@ -57,18 +57,35 @@ class SettingsService extends ChangeNotifier {
   ThemeData getDarkTheme() {
     return ThemeData(
       useMaterial3: true,
+      brightness: Brightness.dark,
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.green,
         brightness: Brightness.dark,
       ),
       scaffoldBackgroundColor: const Color(0xFF121212),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.grey.shade900,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+      ),
+      cardTheme: CardThemeData(color: Colors.grey.shade800, elevation: 1),
       textTheme: const TextTheme(
+        headlineLarge: TextStyle(color: Colors.white),
+        headlineMedium: TextStyle(color: Colors.white),
+        headlineSmall: TextStyle(color: Colors.white),
+        titleLarge: TextStyle(color: Colors.white),
+        titleMedium: TextStyle(color: Colors.white),
+        titleSmall: TextStyle(color: Colors.white),
         bodyLarge: TextStyle(color: Colors.white),
         bodyMedium: TextStyle(color: Colors.white),
         bodySmall: TextStyle(color: Colors.white70),
         labelLarge: TextStyle(color: Colors.white),
         labelMedium: TextStyle(color: Colors.white),
+        labelSmall: TextStyle(color: Colors.white70),
       ),
+      iconTheme: const IconThemeData(color: Colors.white70),
+      dividerColor: Colors.grey.shade700,
     );
   }
 
@@ -76,18 +93,35 @@ class SettingsService extends ChangeNotifier {
     return ThemeData(
       primarySwatch: Colors.green,
       useMaterial3: true,
+      brightness: Brightness.light,
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.green.shade400,
         brightness: Brightness.light,
       ),
       scaffoldBackgroundColor: const Color(0xFFF5F9F5),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.green.shade400,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+      ),
+      cardTheme: CardThemeData(color: Colors.white, elevation: 2),
       textTheme: const TextTheme(
+        headlineLarge: TextStyle(color: Colors.black87),
+        headlineMedium: TextStyle(color: Colors.black87),
+        headlineSmall: TextStyle(color: Colors.black87),
+        titleLarge: TextStyle(color: Colors.black87),
+        titleMedium: TextStyle(color: Colors.black87),
+        titleSmall: TextStyle(color: Colors.black87),
         bodyLarge: TextStyle(color: Colors.black87),
         bodyMedium: TextStyle(color: Colors.black87),
         bodySmall: TextStyle(color: Colors.black54),
         labelLarge: TextStyle(color: Colors.black87),
         labelMedium: TextStyle(color: Colors.black87),
+        labelSmall: TextStyle(color: Colors.black54),
       ),
+      iconTheme: const IconThemeData(color: Colors.black54),
+      dividerColor: Colors.grey.shade300,
     );
   }
 }

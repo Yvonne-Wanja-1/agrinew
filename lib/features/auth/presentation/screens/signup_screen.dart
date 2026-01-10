@@ -140,35 +140,93 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _handleGoogleSignUp() async {
     setState(() => _isLoading = true);
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
+      debugPrint('🟢 [GOOGLE_SIGNUP] Starting Google Sign-Up');
+
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
+        debugPrint('🟡 [GOOGLE_SIGNUP] User cancelled Google Sign-In');
         setState(() => _isLoading = false);
         return;
       }
 
+      debugPrint(
+        '🟢 [GOOGLE_SIGNUP] Google user signed in: ${googleUser.email}',
+      );
+
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+
+      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
+        throw Exception('Failed to get Google authentication tokens');
+      }
+
+      debugPrint('🟢 [GOOGLE_SIGNUP] Creating Firebase credential');
+
       final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
+        accessToken: googleAuth.accessToken!,
         idToken: googleAuth.idToken,
       );
 
+      debugPrint('🟢 [GOOGLE_SIGNUP] Signing in with Firebase');
       await FirebaseAuth.instance.signInWithCredential(credential);
+
+      debugPrint('✅ [GOOGLE_SIGNUP] Successfully signed in with Google');
 
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/home');
       }
     } on FirebaseAuthException catch (e) {
+      debugPrint(
+        '🔴 [GOOGLE_SIGNUP] FirebaseAuthException: ${e.code} - ${e.message}',
+      );
+
+      if (mounted) {
+        String errorMessage = 'Google sign-up failed: ${e.message}';
+
+        switch (e.code) {
+          case 'account-exists-with-different-credential':
+            errorMessage =
+                'An account already exists with this email. Try signing in instead.';
+            break;
+          case 'invalid-credential':
+            errorMessage = 'Invalid credential received from Google.';
+            break;
+          case 'operation-not-allowed':
+            errorMessage = 'Google sign-up is not enabled.';
+            break;
+          case 'user-disabled':
+            errorMessage = 'This user account has been disabled.';
+            break;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red.shade600,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('🔴 [GOOGLE_SIGNUP] Unexpected error: $e');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Google sign-up failed: ${e.message}')),
+          SnackBar(
+            content: Text('An unexpected error occurred: $e'),
+            backgroundColor: Colors.red.shade600,
+            duration: const Duration(seconds: 4),
+          ),
         );
       }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
+        debugPrint('🟢 [GOOGLE_SIGNUP] Google Sign-Up flow completed');
       }
     }
   }

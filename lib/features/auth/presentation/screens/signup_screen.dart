@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:agriclinichub_new/core/services/auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -18,6 +18,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isSignupInProgress = false;
 
   @override
   void dispose() {
@@ -29,96 +30,159 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
+  /// Sign up with email and password using AuthService
+  /// - Uses Firebase Auth only (no database)
+  /// - Handles errors properly
+  /// - Prevents duplicate signup calls
   Future<void> _handleSignup() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      try {
-        // Check if email already exists
-        final methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(
-          _emailController.text.trim(),
-        );
+    debugPrint('🟢 [SIGNUP] Signup attempt started');
 
-        if (methods.isNotEmpty) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Email already in use. Please try another email.',
-                ),
-              ),
-            );
-          }
-          setState(() => _isLoading = false);
-          return;
-        }
+    // Prevent duplicate signup calls
+    if (_isSignupInProgress) {
+      debugPrint(
+        '🟡 [SIGNUP] Signup already in progress, ignoring duplicate call',
+      );
+      return;
+    }
 
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-        if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/home');
-        }
-      } on FirebaseAuthException catch (e) {
-        if (mounted) {
-          String errorMessage = 'Signup failed';
+    if (!_formKey.currentState!.validate()) {
+      debugPrint('🔴 [SIGNUP] Form validation failed');
+      return;
+    }
 
-          if (e.code == 'weak-password') {
+    _isSignupInProgress = true;
+    setState(() => _isLoading = true);
+
+    try {
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
+
+      debugPrint('🟢 [SIGNUP] Attempting to create user with email: $email');
+
+      // Use AuthService for Firebase Auth
+      await AuthService.signUpWithEmail(email: email, password: password);
+
+      debugPrint('✅ [SIGNUP] User created successfully');
+
+      if (mounted) {
+        debugPrint('🟢 [SIGNUP] Navigating to home screen');
+        Navigator.of(context).pushReplacementNamed('/home');
+      }
+    } on FirebaseAuthException catch (e) {
+      debugPrint('🔴 [SIGNUP] FirebaseAuthException: ${e.code} - ${e.message}');
+
+      if (mounted) {
+        String errorMessage = 'Signup failed';
+
+        switch (e.code) {
+          case 'weak-password':
             errorMessage = 'Password is too weak. Use at least 6 characters.';
-          } else if (e.code == 'email-already-in-use') {
+            break;
+          case 'email-already-in-use':
             errorMessage = 'Email already in use. Please try another email.';
-          } else if (e.code == 'invalid-email') {
+            break;
+          case 'invalid-email':
             errorMessage = 'Email is invalid. Please check and try again.';
-          } else if (e.code == 'operation-not-allowed') {
+            break;
+          case 'operation-not-allowed':
             errorMessage = 'Email/password accounts are not enabled.';
-          } else {
+            break;
+          case 'user-disabled':
+            errorMessage = 'User account has been disabled.';
+            break;
+          default:
             errorMessage = 'Signup failed: ${e.message}';
-          }
+        }
 
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(errorMessage)));
-        }
-      } finally {
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red.shade600,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('🔴 [SIGNUP] Unexpected error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An unexpected error occurred: $e'),
+            backgroundColor: Colors.red.shade600,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        _isSignupInProgress = false;
+        setState(() => _isLoading = false);
+        debugPrint('🟢 [SIGNUP] Signup flow completed, state reset');
       }
     }
   }
 
+  /// Sign up with Google using AuthService
   Future<void> _handleGoogleSignUp() async {
     setState(() => _isLoading = true);
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      debugPrint('🟢 [GOOGLE_SIGNUP] Starting Google Sign-Up');
 
-      if (googleUser == null) {
-        setState(() => _isLoading = false);
-        return;
-      }
+      // Use AuthService for Google sign-in
+      await AuthService.signInWithGoogle();
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      debugPrint('✅ [GOOGLE_SIGNUP] Successfully signed in with Google');
 
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/home');
       }
     } on FirebaseAuthException catch (e) {
+      debugPrint(
+        '🔴 [GOOGLE_SIGNUP] FirebaseAuthException: ${e.code} - ${e.message}',
+      );
+
+      if (mounted) {
+        String errorMessage = 'Google sign-up failed: ${e.message}';
+
+        switch (e.code) {
+          case 'account-exists-with-different-credential':
+            errorMessage =
+                'An account already exists with this email. Try signing in instead.';
+            break;
+          case 'invalid-credential':
+            errorMessage = 'Invalid credential received from Google.';
+            break;
+          case 'operation-not-allowed':
+            errorMessage = 'Google sign-up is not enabled.';
+            break;
+          case 'user-disabled':
+            errorMessage = 'This user account has been disabled.';
+            break;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red.shade600,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('🔴 [GOOGLE_SIGNUP] Unexpected error: $e');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Google sign-up failed: ${e.message}')),
+          SnackBar(
+            content: Text('An unexpected error occurred: $e'),
+            backgroundColor: Colors.red.shade600,
+            duration: const Duration(seconds: 4),
+          ),
         );
       }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
+        debugPrint('🟢 [GOOGLE_SIGNUP] Google Sign-Up flow completed');
       }
     }
   }

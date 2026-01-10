@@ -1,5 +1,5 @@
-import 'package:agriclinichub/core/services/offline_service.dart';
-import 'package:agriclinichub/core/services/notification_logic.dart';
+import 'package:agriclinichub_new/core/services/offline_service.dart';
+import 'package:agriclinichub_new/core/services/notification_logic.dart';
 
 /// ConnectivityListener monitors network status and triggers notifications
 class ConnectivityListener {

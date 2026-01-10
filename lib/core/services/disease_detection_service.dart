@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:agriclinichub/core/services/notification_logic.dart';
+import 'package:agriclinichub_new/core/services/notification_logic.dart';
 
 class DiseaseDetectionService {
   // Initialize TFLite model

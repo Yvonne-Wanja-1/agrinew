@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:agriclinichub_new/core/services/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -18,7 +18,8 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _checkAuthStatus() async {
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
-      final user = FirebaseAuth.instance.currentUser;
+      // Use AuthService to check if user is authenticated
+      final user = AuthService.getCurrentUser();
       if (user != null) {
         // User is logged in, go to home
         Navigator.of(context).pushReplacementNamed('/home');

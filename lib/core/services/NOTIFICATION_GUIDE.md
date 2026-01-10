@@ -145,7 +145,7 @@ await NotificationLogic.onCropMilestone(
 ### Add Notification to a Feature Screen
 
 ```dart
-import 'package:agriclinichub/core/services/notification_logic.dart';
+import 'package:agriclinichub_new/core/services/notification_logic.dart';
 
 class MyFeatureScreen extends StatefulWidget {
   @override

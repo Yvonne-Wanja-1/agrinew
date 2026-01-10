@@ -8,13 +8,18 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        backgroundColor: Colors.green.shade600,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Settings'), elevation: 0),
       body: Consumer<SettingsService>(
         builder: (context, settingsService, _) {
+          final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+          final cardColor = isDarkMode ? Colors.grey.shade800 : Colors.white;
+          final shadowColor = isDarkMode
+              ? Colors.grey.shade700
+              : Colors.green.shade400;
+          final iconColor = isDarkMode
+              ? Colors.green.shade300
+              : Colors.green.shade600;
+
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -27,11 +32,11 @@ class SettingsScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cardColor,
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.shade400,
+                          color: shadowColor.withOpacity(0.3),
                           blurRadius: 5,
                           offset: const Offset(0, 4),
                           spreadRadius: 2,
@@ -41,63 +46,64 @@ class SettingsScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         ListTile(
-                          leading: Icon(
-                            Icons.language,
-                            color: Colors.green.shade600,
-                          ),
-                          title: const Text(
+                          leading: Icon(Icons.language, color: iconColor),
+                          title: Text(
                             'Language',
-                            style: TextStyle(color: Colors.black),
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
-                          subtitle: settingsService.selectedLanguage == 'en'
-                              ? const Text(
-                                  'English',
-                                  style: TextStyle(color: Colors.black54),
-                                )
-                              : const Text(
-                                  'Kiswahili',
-                                  style: TextStyle(color: Colors.black54),
-                                ),
+                          subtitle: Text(
+                            settingsService.selectedLanguage == 'en'
+                                ? 'English'
+                                : 'Kiswahili',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () =>
                               _showLanguageDialog(context, settingsService),
                         ),
-                        const Divider(height: 0),
+                        Divider(
+                          height: 0,
+                          color: isDarkMode
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade300,
+                        ),
                         ListTile(
                           leading: Icon(
                             settingsService.darkModeEnabled
                                 ? Icons.dark_mode
                                 : Icons.light_mode,
-                            color: Colors.green.shade600,
+                            color: iconColor,
                           ),
-                          title: const Text(
+                          title: Text(
                             'Dark Mode',
-                            style: TextStyle(color: Colors.black),
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
                           trailing: Switch(
                             value: settingsService.darkModeEnabled,
                             onChanged: (value) async {
                               await settingsService.setDarkMode(value);
                             },
-                            activeColor: Colors.green.shade600,
+                            activeColor: Colors.green.shade400,
                           ),
                         ),
-                        const Divider(height: 0),
+                        Divider(
+                          height: 0,
+                          color: isDarkMode
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade300,
+                        ),
                         ListTile(
-                          leading: Icon(
-                            Icons.notifications,
-                            color: Colors.green.shade600,
-                          ),
-                          title: const Text(
+                          leading: Icon(Icons.notifications, color: iconColor),
+                          title: Text(
                             'Notifications',
-                            style: TextStyle(color: Colors.black),
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
                           trailing: Switch(
                             value: settingsService.notificationsEnabled,
                             onChanged: (value) async {
                               await settingsService.setNotifications(value);
                             },
-                            activeColor: Colors.green.shade600,
+                            activeColor: Colors.green.shade400,
                           ),
                         ),
                       ],
@@ -109,11 +115,11 @@ class SettingsScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cardColor,
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.shade400,
+                          color: shadowColor.withOpacity(0.3),
                           blurRadius: 5,
                           offset: const Offset(0, 4),
                           spreadRadius: 2,
@@ -123,17 +129,14 @@ class SettingsScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         ListTile(
-                          leading: Icon(
-                            Icons.storage,
-                            color: Colors.green.shade600,
-                          ),
-                          title: const Text(
+                          leading: Icon(Icons.storage, color: iconColor),
+                          title: Text(
                             'Cache Size',
-                            style: TextStyle(color: Colors.black),
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
-                          subtitle: const Text(
+                          subtitle: Text(
                             '2.3 MB',
-                            style: TextStyle(color: Colors.black54),
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
@@ -142,15 +145,17 @@ class SettingsScreen extends StatelessWidget {
                             );
                           },
                         ),
-                        const Divider(height: 0),
+                        Divider(
+                          height: 0,
+                          color: isDarkMode
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade300,
+                        ),
                         ListTile(
-                          leading: Icon(
-                            Icons.backup,
-                            color: Colors.green.shade600,
-                          ),
-                          title: const Text(
+                          leading: Icon(Icons.backup, color: iconColor),
+                          title: Text(
                             'Backup Data',
-                            style: TextStyle(color: Colors.black),
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
@@ -170,11 +175,11 @@ class SettingsScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: cardColor,
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.green.shade400,
+                          color: shadowColor.withOpacity(0.3),
                           blurRadius: 5,
                           offset: const Offset(0, 4),
                           spreadRadius: 2,
@@ -184,29 +189,28 @@ class SettingsScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         ListTile(
-                          leading: Icon(
-                            Icons.info,
-                            color: Colors.green.shade600,
-                          ),
-                          title: const Text(
+                          leading: Icon(Icons.info, color: iconColor),
+                          title: Text(
                             'Version',
-                            style: TextStyle(color: Colors.black),
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
-                          subtitle: const Text(
+                          subtitle: Text(
                             '1.0.0',
-                            style: TextStyle(color: Colors.black54),
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                           trailing: const Icon(Icons.chevron_right),
                         ),
-                        const Divider(height: 0),
+                        Divider(
+                          height: 0,
+                          color: isDarkMode
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade300,
+                        ),
                         ListTile(
-                          leading: Icon(
-                            Icons.description,
-                            color: Colors.green.shade600,
-                          ),
-                          title: const Text(
+                          leading: Icon(Icons.description, color: iconColor),
+                          title: Text(
                             'Privacy Policy',
-                            style: TextStyle(color: Colors.black),
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
@@ -217,15 +221,17 @@ class SettingsScreen extends StatelessWidget {
                             );
                           },
                         ),
-                        const Divider(height: 0),
+                        Divider(
+                          height: 0,
+                          color: isDarkMode
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade300,
+                        ),
                         ListTile(
-                          leading: Icon(
-                            Icons.assignment,
-                            color: Colors.green.shade600,
-                          ),
-                          title: const Text(
+                          leading: Icon(Icons.assignment, color: iconColor),
+                          title: Text(
                             'Terms of Service',
-                            style: TextStyle(color: Colors.black),
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
@@ -244,6 +250,7 @@ class SettingsScreen extends StatelessWidget {
                   _buildSectionTitle(context, 'Account'),
                   const SizedBox(height: 12),
                   Card(
+                    color: cardColor,
                     elevation: 1,
                     child: ListTile(
                       leading: Icon(Icons.logout, color: Colors.red.shade600),

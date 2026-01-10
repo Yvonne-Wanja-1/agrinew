@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:agriclinichub/core/services/notification_service.dart';
+import 'package:agriclinichub_new/core/services/notification_service.dart';
 
 /// NotificationLogic handles all notification triggers based on app events
 class NotificationLogic {

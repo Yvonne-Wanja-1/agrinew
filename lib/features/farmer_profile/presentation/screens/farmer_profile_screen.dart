@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:agriclinichub/core/services/farmer_service.dart';
+import 'package:agriclinichub_new/core/services/farmer_service.dart';
 
 class FarmerProfileScreen extends StatefulWidget {
   const FarmerProfileScreen({Key? key}) : super(key: key);

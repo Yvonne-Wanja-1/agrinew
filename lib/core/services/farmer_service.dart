@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:agriclinichub/core/services/notification_logic.dart';
+import 'package:agriclinichub_new/core/services/notification_logic.dart';
 
 class FarmerService {
   // Replace localhost with your machine's IP if testing on mobile device

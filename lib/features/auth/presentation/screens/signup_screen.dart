@@ -18,6 +18,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isSignupInProgress = false;
 
   @override
   void dispose() {
@@ -29,60 +30,109 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
+  // Fix this signup flow using FirebaseAuth:
+  // - Await createUserWithEmailAndPassword properly
+  // - Navigate ONLY after successful signup
+  // - Do not treat post-signup logic as failure
+  // - Catch FirebaseAuthException separately
+  // - Handle email-already-in-use correctly
+  // - Do not create the user twice
+  // - Prevent duplicate signup calls if function is already running
+  // - Add debugPrint logs for debugging
   Future<void> _handleSignup() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      try {
-        // Check if email already exists
-        final methods = await FirebaseAuth.instance.fetchSignInMethodsForEmail(
-          _emailController.text.trim(),
-        );
+    // Add debugPrint logs: Log when signup starts
+    debugPrint('🟢 [SIGNUP] Signup attempt started');
 
-        if (methods.isNotEmpty) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Email already in use. Please try another email.',
-                ),
-              ),
-            );
-          }
-          setState(() => _isLoading = false);
-          return;
-        }
+    // Prevent duplicate signup calls if function is already running
+    if (_isSignupInProgress) {
+      debugPrint(
+        '🟡 [SIGNUP] Signup already in progress, ignoring duplicate call',
+      );
+      return;
+    }
 
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-        if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/home');
-        }
-      } on FirebaseAuthException catch (e) {
-        if (mounted) {
-          String errorMessage = 'Signup failed';
+    if (!_formKey.currentState!.validate()) {
+      debugPrint('🔴 [SIGNUP] Form validation failed');
+      return;
+    }
 
-          if (e.code == 'weak-password') {
+    // Guard against duplicate calls
+    _isSignupInProgress = true;
+    setState(() => _isLoading = true);
+
+    try {
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
+
+      debugPrint('🟢 [SIGNUP] Attempting to create user with email: $email');
+
+      // Await createUserWithEmailAndPassword properly
+      final userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      debugPrint(
+        '✅ [SIGNUP] User created successfully: ${userCredential.user?.uid}',
+      );
+
+      // Log when signup succeeds
+      if (mounted) {
+        debugPrint('🟢 [SIGNUP] Navigating to home screen');
+        // Navigate ONLY after successful signup
+        Navigator.of(context).pushReplacementNamed('/home');
+      }
+    } on FirebaseAuthException catch (e) {
+      debugPrint('🔴 [SIGNUP] FirebaseAuthException: ${e.code} - ${e.message}');
+
+      // Catch FirebaseAuthException separately
+      if (mounted) {
+        // Improve error handling: Map common error codes to user-friendly messages
+        String errorMessage = 'Signup failed';
+
+        switch (e.code) {
+          case 'weak-password':
             errorMessage = 'Password is too weak. Use at least 6 characters.';
-          } else if (e.code == 'email-already-in-use') {
+            break;
+          case 'email-already-in-use':
             errorMessage = 'Email already in use. Please try another email.';
-          } else if (e.code == 'invalid-email') {
+            break;
+          case 'invalid-email':
             errorMessage = 'Email is invalid. Please check and try again.';
-          } else if (e.code == 'operation-not-allowed') {
+            break;
+          case 'operation-not-allowed':
             errorMessage = 'Email/password accounts are not enabled.';
-          } else {
+            break;
+          case 'user-disabled':
+            errorMessage = 'User account has been disabled.';
+            break;
+          default:
             errorMessage = 'Signup failed: ${e.message}';
-          }
+        }
 
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(errorMessage)));
-        }
-      } finally {
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
+        // Show FirebaseAuthException messages without fake errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red.shade600,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('🔴 [SIGNUP] Unexpected error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An unexpected error occurred: $e'),
+            backgroundColor: Colors.red.shade600,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        // Reset loading state and signup guard
+        _isSignupInProgress = false;
+        setState(() => _isLoading = false);
+        debugPrint('🟢 [SIGNUP] Signup flow completed, state reset');
       }
     }
   }

@@ -41,7 +41,7 @@ class AgriClinicHubApp extends StatelessWidget {
                 ? ThemeMode.dark
                 : ThemeMode.light,
             onGenerateRoute: AppRouter.generateRoute,
-            initialRoute: AppRouter.splash,
+            initialRoute: AppRouter.login,
           );
         },
       ),

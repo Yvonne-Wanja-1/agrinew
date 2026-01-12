@@ -3,9 +3,6 @@ import '../../features/auth/presentation/widgets/auth_gate.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/delete_account_screen.dart';
-import '../../features/auth/presentation/screens/email_verification_screen.dart';
-import '../../features/auth/presentation/screens/phone_number_input_screen.dart';
-import '../../features/auth/presentation/screens/otp_input_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/disease_detection/presentation/screens/scan_screen.dart';
 import '../../features/disease_detection/presentation/screens/scan_result_screen.dart';
@@ -25,9 +22,6 @@ class AppRouter {
   static const String splash = '/';
   static const String login = '/login';
   static const String register = '/register';
-  static const String emailVerification = '/email-verification';
-  static const String phoneNumberInput = '/phone-number-input';
-  static const String otpInput = '/otp-input';
   static const String deleteAccount = '/delete-account';
   static const String home = '/home';
   static const String scan = '/scan';
@@ -51,27 +45,6 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case AppRouter.register:
         return MaterialPageRoute(builder: (_) => const RegisterScreen());
-      case AppRouter.emailVerification:
-        final args = settings.arguments as Map<String, dynamic>?;
-        return MaterialPageRoute(
-          builder: (_) => EmailVerificationScreen(
-            user: args?['user'],
-            email: args?['email'] ?? '',
-          ),
-        );
-      case AppRouter.phoneNumberInput:
-        final args = settings.arguments as Map<String, dynamic>?;
-        return MaterialPageRoute(
-          builder: (_) => PhoneNumberInputScreen(user: args?['user']),
-        );
-      case AppRouter.otpInput:
-        final args = settings.arguments as Map<String, dynamic>?;
-        return MaterialPageRoute(
-          builder: (_) => OTPInputScreen(
-            verificationId: args?['verificationId'] ?? '',
-            phoneNumber: args?['phoneNumber'] ?? '',
-          ),
-        );
       case AppRouter.deleteAccount:
         return MaterialPageRoute(builder: (_) => const DeleteAccountScreen());
       case AppRouter.home:

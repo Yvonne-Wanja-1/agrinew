@@ -87,19 +87,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       debugPrint('✅ [REGISTER] User created: ${userCredential.user?.email}');
 
       if (mounted && userCredential.user != null) {
-        // Send email verification
-        await userCredential.user!.sendEmailVerification();
-        debugPrint('✅ [REGISTER] Email verification sent');
-
-        // Navigate to email verification screen
-        Navigator.of(context).pushReplacementNamed(
-          '/email-verification',
-          arguments: {
-            'user': userCredential.user,
-            'email': userCredential.user?.email ?? '',
-            'phoneNumber': _formatPhoneNumber(_phoneController.text),
-          },
-        );
+        // Navigate directly to home
+        Navigator.of(context).pushReplacementNamed('/home');
       }
     } on FirebaseAuthException catch (e) {
       debugPrint('🔴 [REGISTER] Firebase error: ${e.message}');

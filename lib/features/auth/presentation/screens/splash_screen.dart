@@ -21,10 +21,25 @@ class _SplashScreenState extends State<SplashScreen> {
       // Use AuthService to check if user is authenticated
       final user = AuthService.getCurrentUser();
       if (user != null) {
-        // User is logged in, go to home
-        Navigator.of(context).pushReplacementNamed('/home');
+        // User is logged in, but check verification status
+        final emailVerified = user.emailVerified;
+        debugPrint(
+          '🟢 [SPLASH] User found: ${user.email}, Email verified: $emailVerified',
+        );
+
+        if (emailVerified) {
+          // Email is verified, go to home
+          Navigator.of(context).pushReplacementNamed('/home');
+        } else {
+          // Email not verified, go to email verification screen
+          Navigator.of(context).pushReplacementNamed(
+            '/email-verification',
+            arguments: {'user': user, 'email': user.email ?? ''},
+          );
+        }
       } else {
         // User is not logged in, go to login
+        debugPrint('🟢 [SPLASH] No user found, going to login');
         Navigator.of(context).pushReplacementNamed('/login');
       }
     }

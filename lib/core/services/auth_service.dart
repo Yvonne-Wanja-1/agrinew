@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 /// AuthService handles Firebase Authentication ONLY
@@ -169,5 +170,75 @@ class AuthService {
   // Listen to auth state changes
   static Stream<User?> authStateChanges() {
     return _auth.authStateChanges();
+  }
+
+  // In-memory storage for phone OTP verification (for demo purposes)
+  static final Map<String, String> _phoneOtpStorage = {};
+
+  // Send phone OTP via SMS (demo implementation)
+  static Future<void> sendPhoneOtp(String phoneNumber) async {
+    try {
+      // Generate a random 6-digit OTP
+      final random = DateTime.now().millisecondsSinceEpoch % 1000000;
+      final otp = random.toString().padLeft(6, '0');
+
+      // Store OTP in memory (in production, send via SMS service like Twilio)
+      _phoneOtpStorage[phoneNumber] = otp;
+
+      debugPrint('🟢 [AUTH_SERVICE] OTP for $phoneNumber: $otp');
+      // In production, you would call an SMS service here like:
+      // await _smsService.sendOtp(phoneNumber, otp);
+    } catch (e) {
+      throw Exception('Failed to send phone OTP: $e');
+    }
+  }
+
+  // Verify phone OTP
+  static Future<bool> verifyPhoneOtp({
+    required String phoneNumber,
+    required String otp,
+  }) async {
+    try {
+      // For demo: accept any 6-digit code
+      if (otp.length == 6 && RegExp(r'^\d{6}$').hasMatch(otp)) {
+        // In production, verify against stored OTP
+        final storedOtp = _phoneOtpStorage[phoneNumber];
+        if (storedOtp == otp) {
+          debugPrint('✅ [AUTH_SERVICE] Phone OTP verified successfully');
+          // Clear the OTP after verification
+          _phoneOtpStorage.remove(phoneNumber);
+          return true;
+        }
+
+        // For demo, accept any 6-digit code
+        debugPrint('✅ [AUTH_SERVICE] Phone OTP verified (demo mode)');
+        _phoneOtpStorage.remove(phoneNumber);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      throw Exception('Failed to verify phone OTP: $e');
+    }
+  }
+
+  // Check if email is verified
+  static Future<bool> isEmailVerified() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.reload();
+        return _auth.currentUser?.emailVerified ?? false;
+      }
+      return false;
+    } catch (e) {
+      throw Exception('Failed to check email verification status: $e');
+    }
+  }
+
+  // Check if phone is verified (stored in custom claims or user metadata)
+  static bool isPhoneVerified() {
+    // This would typically be stored in Firestore or custom claims
+    // For now, return false (user can skip phone verification)
+    return false;
   }
 }

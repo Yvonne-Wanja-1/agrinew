@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:agriclinichub_new/core/services/auth_service.dart';
+import 'package:agriclinichub_new/core/services/sms_otp_service.dart';
 
 class PhoneVerificationScreen extends StatefulWidget {
   final String? phoneNumber;
@@ -14,6 +14,7 @@ class PhoneVerificationScreen extends StatefulWidget {
 class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
   final _phoneController = TextEditingController();
   final _otpController = TextEditingController();
+  final _smsOtpService = SmsOtpService();
   bool _isLoading = false;
   bool _isResending = false;
   bool _phoneEntered = false;
@@ -79,9 +80,8 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
       final formattedPhone = _formatPhoneNumber(_phoneController.text);
       debugPrint('🟢 [PHONE_OTP] Sending OTP to $formattedPhone');
 
-      // In production, you would call your backend to send SMS OTP
-      // For now, we'll simulate the OTP sending
-      await AuthService.sendPhoneOtp(formattedPhone);
+      // Send SMS OTP
+      await _smsOtpService.sendSmsOtp(phoneNumber: formattedPhone);
 
       debugPrint('✅ [PHONE_OTP] OTP sent successfully');
 
@@ -89,7 +89,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
         setState(() => _phoneEntered = true);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Verification code sent via SMS'),
+            content: Text('6-digit code sent via SMS'),
             duration: Duration(seconds: 3),
           ),
         );
@@ -114,7 +114,14 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
   Future<void> _verifyPhoneOtp() async {
     if (_otpController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter the verification code')),
+        const SnackBar(content: Text('Please enter the 6-digit code')),
+      );
+      return;
+    }
+
+    if (_otpController.text.length != 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Code must be 6 digits')),
       );
       return;
     }
@@ -125,7 +132,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
       debugPrint('🟢 [PHONE_OTP] Verifying OTP for $formattedPhone');
 
       // Verify the OTP
-      final isValid = await AuthService.verifyPhoneOtp(
+      final isValid = await _smsOtpService.verifySmsOtp(
         phoneNumber: formattedPhone,
         otp: _otpController.text,
       );
@@ -140,7 +147,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
             ),
           );
           // Navigate to home after a short delay
-          await Future.delayed(const Duration(seconds: 2));
+          await Future.delayed(const Duration(seconds: 1));
           if (mounted) {
             Navigator.of(context).pushReplacementNamed('/home');
           }
@@ -168,8 +175,10 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
   Future<void> _resendOtp() async {
     setState(() => _isResending = true);
     try {
-      await _sendPhoneOtp();
+      final formattedPhone = _formatPhoneNumber(_phoneController.text);
+      await _smsOtpService.resendSmsOtp(phoneNumber: formattedPhone);
       setState(() => _resendCountdown = 60);
+      _otpController.clear();
 
       // Countdown timer
       for (int i = 60; i > 0; i--) {
@@ -212,35 +221,37 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Colors.green.shade600, Colors.green.shade400],
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.green.shade600, Colors.green.shade400],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 20),
-                        Center(
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
+          child: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 20),
+                          Center(
+                            child: Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
                               Icons.phone_outlined,
                               size: 40,
                               color: Colors.white,
@@ -472,6 +483,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

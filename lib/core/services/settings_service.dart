@@ -24,12 +24,18 @@ class SettingsService extends ChangeNotifier {
 
   // Initialize settings
   Future<void> initialize() async {
-    _prefs = await SharedPreferences.getInstance();
-    _darkModeEnabled = _prefs.getBool('dark_mode') ?? false;
-    _notificationsEnabled = _prefs.getBool('notifications') ?? true;
-    _selectedLanguage = _prefs.getString('language') ?? 'en';
-    _isInitialized = true;
-    notifyListeners();
+    if (_isInitialized) return;
+    try {
+      _prefs = await SharedPreferences.getInstance();
+      _darkModeEnabled = _prefs.getBool('dark_mode') ?? false;
+      _notificationsEnabled = _prefs.getBool('notifications') ?? true;
+      _selectedLanguage = _prefs.getString('language') ?? 'en';
+      _isInitialized = true;
+      notifyListeners();
+    } catch (e) {
+      _isInitialized = false;
+      rethrow;
+    }
   }
 
   // Dark Mode Toggle

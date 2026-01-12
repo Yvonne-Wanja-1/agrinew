@@ -17,10 +17,16 @@ void main() async {
   await NotificationService.requestPermissions();
   await LocalStorageService.initialize();
   await ConnectivityListener.initialize();
-  await SettingsService().initialize();
+  final settingsService = SettingsService();
+  await settingsService.initialize();
   await LocalNotificationService().initialize();
   await ConnectivityService().initialize();
-  runApp(const AgriClinicHubApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => settingsService,
+      child: const AgriClinicHubApp(),
+    ),
+  );
 }
 
 class AgriClinicHubApp extends StatelessWidget {
@@ -28,26 +34,20 @@ class AgriClinicHubApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SettingsService>.value(
-      value: SettingsService(),
-      child: Consumer<SettingsService>(
-        builder: (context, settingsService, _) {
-          print(
-            '🔄 [MAIN] Theme updated - Dark mode: ${settingsService.darkModeEnabled}',
-          );
-          return MaterialApp(
-            title: 'Agri Clinic Hub',
-            debugShowCheckedModeBanner: false,
-            theme: settingsService.getLightTheme(),
-            darkTheme: settingsService.getDarkTheme(),
-            themeMode: settingsService.darkModeEnabled
-                ? ThemeMode.dark
-                : ThemeMode.light,
-            onGenerateRoute: AppRouter.generateRoute,
-            initialRoute: AppRouter.login,
-          );
-        },
-      ),
+    return Consumer<SettingsService>(
+      builder: (context, settingsService, _) {
+        return MaterialApp(
+          title: 'Agri Clinic Hub',
+          debugShowCheckedModeBanner: false,
+          theme: settingsService.getLightTheme(),
+          darkTheme: settingsService.getDarkTheme(),
+          themeMode: settingsService.darkModeEnabled
+              ? ThemeMode.dark
+              : ThemeMode.light,
+          onGenerateRoute: AppRouter.generateRoute,
+          initialRoute: AppRouter.login,
+        );
+      },
     );
   }
 }

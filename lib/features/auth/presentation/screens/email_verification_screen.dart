@@ -101,10 +101,13 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             ),
           );
 
-          // Navigate to phone verification after a short delay
+          // Navigate to phone number input after a short delay
           await Future.delayed(const Duration(seconds: 1));
           if (mounted) {
-            Navigator.of(context).pushReplacementNamed('/phone-verification');
+            Navigator.of(context).pushReplacementNamed(
+              '/phone-number-input',
+              arguments: {'user': widget.user},
+            );
           }
         }
       } else {

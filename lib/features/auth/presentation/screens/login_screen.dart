@@ -27,19 +27,13 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       try {
-        final credential = await AuthService.loginWithEmail(
+        await AuthService.loginWithEmail(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
         if (mounted) {
-          // Navigate to email verification instead of home
-          Navigator.of(context).pushReplacementNamed(
-            '/email-verification',
-            arguments: {
-              'user': credential.user,
-              'email': credential.user?.email ?? '',
-            },
-          );
+          // Navigate directly to home
+          Navigator.of(context).pushReplacementNamed('/home');
         }
       } on FirebaseAuthException catch (e) {
         if (mounted) {
@@ -58,17 +52,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isLoading = true);
     try {
-      final credential = await AuthService.signInWithGoogle();
+      await AuthService.signInWithGoogle();
 
       if (mounted) {
-        // Navigate to email verification instead of home
-        Navigator.of(context).pushReplacementNamed(
-          '/email-verification',
-          arguments: {
-            'user': credential.user,
-            'email': credential.user?.email ?? '',
-          },
-        );
+        // Navigate directly to home
+        Navigator.of(context).pushReplacementNamed('/home');
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -414,7 +402,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 GestureDetector(
                                   onTap: () {
-                                    Navigator.of(context).pushNamed('/signup');
+                                    Navigator.of(
+                                      context,
+                                    ).pushNamed('/register');
                                   },
                                   child: Text(
                                     'Sign Up',

@@ -414,7 +414,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 GestureDetector(
                                   onTap: () {
-                                    Navigator.of(context).pushNamed('/signup');
+                                    Navigator.of(
+                                      context,
+                                    ).pushNamed('/register');
                                   },
                                   child: Text(
                                     'Sign Up',

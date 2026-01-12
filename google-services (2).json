@@ -59,14 +59,6 @@
       "oauth_client": [
         {
           "client_id": "591444926690-8ctidk7pqlla8lavhgac3h3q48ui23o4.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.agriclinichub_new",
-            "certificate_hash": "1e739b8602ef0acc4e61a3a462d2d504d5f16bc9"
-          }
-        },
-        {
-          "client_id": "591444926690-8ctidk7pqlla8lavhgac3h3q48ui23o4.apps.googleusercontent.com",
           "client_type": 3
         }
       ],

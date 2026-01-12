@@ -36,6 +36,7 @@ class SettingsService extends ChangeNotifier {
   Future<void> setDarkMode(bool value) async {
     _darkModeEnabled = value;
     await _prefs.setBool('dark_mode', value);
+    print('🌓 [SETTINGS] Dark mode changed to: $value');
     notifyListeners();
   }
 

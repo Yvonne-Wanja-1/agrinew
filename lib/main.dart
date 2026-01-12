@@ -28,10 +28,13 @@ class AgriClinicHubApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => SettingsService(),
+    return ChangeNotifierProvider<SettingsService>.value(
+      value: SettingsService(),
       child: Consumer<SettingsService>(
         builder: (context, settingsService, _) {
+          print(
+            '🔄 [MAIN] Theme updated - Dark mode: ${settingsService.darkModeEnabled}',
+          );
           return MaterialApp(
             title: 'Agri Clinic Hub',
             debugShowCheckedModeBanner: false,

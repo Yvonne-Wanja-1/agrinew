@@ -258,13 +258,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               alignment: Alignment.centerRight,
                               child: TextButton(
                                 onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Password reset feature coming soon',
-                                      ),
-                                    ),
-                                  );
+                                  Navigator.of(
+                                    context,
+                                  ).pushNamed('/forgot-password');
                                 },
                                 child: Text(
                                   'Forgot Password?',
@@ -310,89 +306,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             const SizedBox(height: 20),
-                            Row(
-                              children: [
-                                Expanded(child: Divider(color: Colors.white30)),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                  ),
-                                  child: Text(
-                                    'OR',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(child: Divider(color: Colors.white30)),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: _isLoading
-                                        ? null
-                                        : _handleGoogleSignIn,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                    icon: Image.asset(
-                                      'assets/images/google.png',
-                                      width: 16,
-                                      height: 16,
-                                    ),
-                                    label: Text(
-                                      'Google',
-                                      style: TextStyle(
-                                        color: Colors.green.shade600,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: _isLoading
-                                        ? null
-                                        : _handleGoogleSignIn,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 12,
-                                      ),
-                                    ),
-                                    icon: Image.asset(
-                                      'assets/images/gmail.png',
-                                      width: 16,
-                                      height: 16,
-                                    ),
-                                    label: Text(
-                                      'Gmail',
-                                      style: TextStyle(
-                                        color: Colors.green.shade600,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
                             const SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,

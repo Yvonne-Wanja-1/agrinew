@@ -1,10 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:async';
 
 /// EmailOtpService handles email-based OTP sending and verification
-/// Uses Firebase Cloud Functions (backend) to send actual emails
-/// Or demonstrates with generated OTPs for testing
+/// Generates and validates OTPs locally for testing
+/// For production, integrate with email service (SendGrid, Mailgun, etc.)
 class EmailOtpService {
   static final EmailOtpService _instance = EmailOtpService._internal();
 
@@ -23,8 +22,8 @@ class EmailOtpService {
   static const Duration _otpValidityDuration = Duration(minutes: 5);
 
   /// Send a 4-digit OTP via email
-  /// In production, this calls a Firebase Cloud Function that sends actual emails
-  Future<void> sendEmailOtp({required String email, required User user}) async {
+  /// In production, integrate with an email service
+  Future<void> sendEmailOtp({required String email}) async {
     try {
       debugPrint('🟢 [EMAIL_OTP_SERVICE] Sending 4-digit OTP to $email');
 

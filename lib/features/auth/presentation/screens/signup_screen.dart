@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:agriclinichub_new/core/services/auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -77,8 +76,8 @@ class _SignupScreenState extends State<SignupScreen> {
           },
         );
       }
-    } on FirebaseAuthException catch (e) {
-      debugPrint('🔴 [SIGNUP] FirebaseAuthException: ${e.code} - ${e.message}');
+    } on AuthException catch (e) {
+      debugPrint('🔴 [SIGNUP] AuthException: ${e.code} - ${e.message}');
 
       if (mounted) {
         String errorMessage = 'Signup failed';

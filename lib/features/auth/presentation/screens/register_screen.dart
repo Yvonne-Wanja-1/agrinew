@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:agriclinichub_new/core/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -90,8 +89,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         // Navigate directly to home
         Navigator.of(context).pushReplacementNamed('/home');
       }
-    } on FirebaseAuthException catch (e) {
-      debugPrint('🔴 [REGISTER] Firebase error: ${e.message}');
+    } on AuthException catch (e) {
+      debugPrint('🔴 [REGISTER] Auth error: ${e.message}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

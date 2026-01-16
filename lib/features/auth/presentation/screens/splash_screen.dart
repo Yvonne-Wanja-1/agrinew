@@ -34,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
           // Email not verified, go to email verification screen
           Navigator.of(context).pushReplacementNamed(
             '/email-verification',
-            arguments: {'user': user, 'email': user.email ?? ''},
+            arguments: {'email': user.email},
           );
         }
       } else {

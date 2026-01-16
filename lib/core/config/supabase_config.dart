@@ -1,16 +1,11 @@
 /// Supabase Configuration
-///
-/// To set up Supabase:
-/// 1. Go to https://supabase.com and create a new project
-/// 2. Copy your Supabase URL and Anon Key from project settings
-/// 3. Replace the values below with your actual credentials
-/// 4. For environment-specific configuration, use .env files with flutter_dotenv package
+/// Production credentials for Agri Clinic Hub
 
 class SupabaseConfig {
-  // TODO: Replace with your actual Supabase URL and anon key
-  // Get these from your Supabase project settings
-  static const String supabaseUrl = 'https://your-project.supabase.co';
-  static const String supabaseAnonKey = 'your-anon-key-here';
+  // Supabase project credentials
+  static const String supabaseUrl = 'https://kefaczvopjostwlyzfcm.supabase.co';
+  static const String supabaseAnonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlZmFjenZvcGpvc3R3bHl6ZmNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NDk1NDUsImV4cCI6MjA4NDEyNTU0NX0.cZIBmMwgLrVnSHCzP07xBKXcuU5bHqPXE7wkQ6jFO5A';
 
   /// Supabase Database Tables
   /// Create these tables in your Supabase project:

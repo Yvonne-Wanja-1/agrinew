@@ -83,9 +83,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: _passwordController.text.trim(),
       );
 
-      debugPrint('✅ [REGISTER] User created: ${userCredential.user?.email}');
+      debugPrint('✅ [REGISTER] User created: ${userCredential.email}');
 
-      if (mounted && userCredential.user != null) {
+      if (mounted) {
         // Navigate directly to home
         Navigator.of(context).pushReplacementNamed('/home');
       }

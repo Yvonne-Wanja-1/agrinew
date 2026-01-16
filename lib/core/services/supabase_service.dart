@@ -4,6 +4,7 @@ import 'package:agriclinichub_new/core/models/farmer_profile.dart';
 import 'package:agriclinichub_new/core/models/scan_result.dart';
 import 'package:agriclinichub_new/core/config/supabase_config.dart';
 import 'dart:convert';
+import 'dart:typed_data';
 
 /// Supabase Service
 /// Handles all database operations and cloud storage for:
@@ -231,7 +232,7 @@ class SupabaseService {
 
       await _client.storage
           .from(SupabaseConfig.storageFolder)
-          .uploadBinary(path, fileBytes);
+          .uploadBinary(path, Uint8List.fromList(fileBytes));
 
       final publicUrl = _client.storage
           .from(SupabaseConfig.storageFolder)

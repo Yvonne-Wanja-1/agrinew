@@ -100,16 +100,13 @@ class EmailOtpService {
   }
 
   /// Resend OTP with cooldown period
-  Future<void> resendEmailOtp({
-    required String email,
-    required User user,
-  }) async {
+  Future<void> resendEmailOtp({required String email}) async {
     try {
       // Clear old OTP and send new one
       _emailOtpStorage.remove(email);
       _otpExpiry.remove(email);
 
-      await sendEmailOtp(email: email, user: user);
+      await sendEmailOtp(email: email);
     } catch (e) {
       debugPrint('🔴 [EMAIL_OTP_SERVICE] Error resending OTP: $e');
       rethrow;

@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:agriclinichub_new/core/services/auth_service.dart';
 import 'package:agriclinichub_new/core/services/email_otp_service.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
-  final User user;
   final String email;
 
-  const EmailVerificationScreen({
-    Key? key,
-    required this.user,
-    required this.email,
-  }) : super(key: key);
+  const EmailVerificationScreen({Key? key, required this.email})
+    : super(key: key);
 
   @override
   State<EmailVerificationScreen> createState() =>
@@ -39,10 +35,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   Future<void> _sendEmailOtp() async {
     debugPrint('🟢 [EMAIL_VERIFICATION] Sending OTP to ${widget.email}');
     try {
-      await _emailOtpService.sendEmailOtp(
-        email: widget.email,
-        user: widget.user,
-      );
+      await _emailOtpService.sendEmailOtp(email: widget.email);
       debugPrint('✅ [EMAIL_VERIFICATION] OTP sent successfully');
 
       if (mounted) {
@@ -94,6 +87,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
       if (isValid) {
         debugPrint('✅ [EMAIL_VERIFICATION] Email verified successfully');
         if (mounted) {
+          await AuthService.markEmailAsVerified();
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Email verified successfully!'),
@@ -101,13 +96,10 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             ),
           );
 
-          // Navigate to phone number input after a short delay
+          // Navigate to home after a short delay
           await Future.delayed(const Duration(seconds: 1));
           if (mounted) {
-            Navigator.of(context).pushReplacementNamed(
-              '/phone-number-input',
-              arguments: {'user': widget.user},
-            );
+            Navigator.of(context).pushReplacementNamed('/home');
           }
         }
       } else {

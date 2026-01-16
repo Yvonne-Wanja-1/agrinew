@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:agriclinichub_new/core/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -35,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // Navigate directly to home
           Navigator.of(context).pushReplacementNamed('/home');
         }
-      } on FirebaseAuthException catch (e) {
+      } on AuthException catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
@@ -58,11 +57,11 @@ class _LoginScreenState extends State<LoginScreen> {
         // Navigate directly to home
         Navigator.of(context).pushReplacementNamed('/home');
       }
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Google sign-in failed: ${e.message}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Sign-in failed: ${e.message}')));
       }
     } finally {
       if (mounted) {

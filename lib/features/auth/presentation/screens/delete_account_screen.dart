@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:agriclinichub_new/core/services/auth_service.dart';
 
 class DeleteAccountScreen extends StatefulWidget {
   const DeleteAccountScreen({Key? key}) : super(key: key);
@@ -41,19 +41,14 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
 
     setState(() => _isLoading = true);
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = AuthService.getCurrentUser();
       if (user == null) {
         throw Exception('No user logged in');
       }
 
-      // Re-authenticate user before deleting account
-      final credential = EmailAuthProvider.credential(
-        email: user.email ?? '',
+      await AuthService.deleteAccount(
         password: _passwordController.text.trim(),
       );
-
-      await user.reauthenticateWithCredential(credential);
-      await user.delete();
 
       if (mounted) {
         Navigator.of(
@@ -66,15 +61,13 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
           ),
         );
       }
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       if (mounted) {
         String errorMessage = 'Failed to delete account';
         if (e.code == 'wrong-password') {
           errorMessage = 'Wrong password. Please try again.';
         } else if (e.code == 'user-mismatch') {
           errorMessage = 'User credentials do not match';
-        } else if (e.code == 'requires-recent-login') {
-          errorMessage = 'Please log in again before deleting your account';
         }
 
         ScaffoldMessenger.of(

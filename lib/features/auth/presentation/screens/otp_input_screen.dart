@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:agriclinichub_new/core/services/auth_service.dart';
 
 class OTPInputScreen extends StatefulWidget {
-  final String verificationId;
   final String phoneNumber;
 
-  const OTPInputScreen({
-    Key? key,
-    required this.verificationId,
-    required this.phoneNumber,
-  }) : super(key: key);
+  const OTPInputScreen({Key? key, required this.phoneNumber}) : super(key: key);
 
   @override
   State<OTPInputScreen> createState() => _OTPInputScreenState();
@@ -52,29 +47,36 @@ class _OTPInputScreenState extends State<OTPInputScreen> {
     try {
       debugPrint('🟢 [OTP_INPUT] Verifying OTP');
 
-      final credential = PhoneAuthProvider.credential(
-        verificationId: widget.verificationId,
-        smsCode: _otpController.text,
+      final isValid = await AuthService.verifyPhoneOtp(
+        phoneNumber: widget.phoneNumber,
+        otp: _otpController.text,
       );
 
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      if (isValid) {
+        debugPrint('✅ [OTP_INPUT] Phone verified successfully');
 
-      debugPrint('✅ [OTP_INPUT] Phone verified successfully');
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Phone verified successfully!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/home');
+          await AuthService.markPhoneAsVerified(widget.phoneNumber);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Phone verified successfully!'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          await Future.delayed(const Duration(seconds: 1));
+          if (mounted) {
+            Navigator.of(context).pushReplacementNamed('/home');
+          }
         }
+      } else {
+        throw AuthException(
+          code: 'invalid-otp',
+          message: 'Invalid OTP. Please try again.',
+        );
       }
-    } on FirebaseAuthException catch (e) {
+    } on AuthException catch (e) {
       debugPrint('🔴 [OTP_INPUT] Verification failed: ${e.message}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -89,10 +91,7 @@ class _OTPInputScreenState extends State<OTPInputScreen> {
       debugPrint('🔴 [OTP_INPUT] Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
         setState(() => _isLoading = false);
       }
@@ -103,23 +102,8 @@ class _OTPInputScreenState extends State<OTPInputScreen> {
     setState(() => _isResending = true);
     try {
       debugPrint('🟢 [OTP_INPUT] Resending OTP');
-
-      await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: widget.phoneNumber,
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          await FirebaseAuth.instance.signInWithCredential(credential);
-          if (mounted) {
-            Navigator.of(context).pushReplacementNamed('/home');
-          }
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          debugPrint('🔴 [OTP_INPUT] Resend failed: ${e.message}');
-        },
-        codeSent: (String newVerificationId, int? resendToken) {
-          debugPrint('✅ [OTP_INPUT] OTP resent');
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {},
-      );
+      await AuthService.sendPhoneOtp(widget.phoneNumber);
+      debugPrint('✅ [OTP_INPUT] OTP resent');
 
       setState(() {
         _resendCountdown = 60;
@@ -206,9 +190,7 @@ class _OTPInputScreenState extends State<OTPInputScreen> {
                         children: [
                           Text(
                             'Enter OTP',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
+                            style: Theme.of(context).textTheme.headlineMedium
                                 ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -217,17 +199,13 @@ class _OTPInputScreenState extends State<OTPInputScreen> {
                           const SizedBox(height: 8),
                           Text(
                             'We sent a 6-digit code to',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(color: Colors.white70),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             widget.phoneNumber,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
@@ -248,13 +226,10 @@ class _OTPInputScreenState extends State<OTPInputScreen> {
                     TextField(
                       controller: _otpController,
                       enabled: !_isLoading,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(
-                            fontSize: 18,
-                            letterSpacing: 4,
-                          ),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 18,
+                        letterSpacing: 4,
+                      ),
                       textAlign: TextAlign.center,
                       maxLength: 6,
                       keyboardType: TextInputType.number,
@@ -285,29 +260,22 @@ class _OTPInputScreenState extends State<OTPInputScreen> {
                         children: [
                           Text(
                             'Didn\'t receive code?',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: Colors.white70),
                           ),
                           const SizedBox(height: 8),
                           if (_resendCountdown > 0)
                             Text(
                               'Resend in ${_resendCountdown}s',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: Colors.white70),
                             )
                           else
                             GestureDetector(
-                              onTap:
-                                  _isResending ? null : _resendOTP,
+                              onTap: _isResending ? null : _resendOTP,
                               child: Text(
                                 'Resend Code',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
+                                style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,

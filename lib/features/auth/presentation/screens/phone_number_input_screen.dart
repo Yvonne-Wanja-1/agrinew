@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:agriclinichub_new/core/services/auth_service.dart';
 
 class PhoneNumberInputScreen extends StatefulWidget {
-  final User user;
-
-  const PhoneNumberInputScreen({Key? key, required this.user})
-    : super(key: key);
+  const PhoneNumberInputScreen({Key? key}) : super(key: key);
 
   @override
   State<PhoneNumberInputScreen> createState() => _PhoneNumberInputScreenState();
@@ -67,44 +64,26 @@ class _PhoneNumberInputScreenState extends State<PhoneNumberInputScreen> {
       final formattedPhone = _formatPhoneNumber(_phoneController.text);
       debugPrint('🟢 [PHONE_INPUT] Sending OTP to $formattedPhone');
 
-      await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: formattedPhone,
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          debugPrint('✅ [PHONE_INPUT] Auto verification completed');
-          // Auto sign in (if SIM card matches the phone number)
-          await FirebaseAuth.instance.signInWithCredential(credential);
-          if (mounted) {
-            Navigator.of(context).pushReplacementNamed('/home');
-          }
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          debugPrint('🔴 [PHONE_INPUT] Verification failed: ${e.message}');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error: ${e.message}'),
-                backgroundColor: Colors.red,
-              ),
-            );
-            setState(() => _isLoading = false);
-          }
-        },
-        codeSent: (String verificationId, int? resendToken) {
-          debugPrint('✅ [PHONE_INPUT] OTP sent, moving to OTP input screen');
-          if (mounted) {
-            Navigator.of(context).pushReplacementNamed(
-              '/otp-input',
-              arguments: {
-                'verificationId': verificationId,
-                'phoneNumber': formattedPhone,
-              },
-            );
-          }
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          debugPrint('🟡 [PHONE_INPUT] Auto retrieval timeout');
-        },
-      );
+      await AuthService.sendPhoneOtp(formattedPhone);
+
+      if (mounted) {
+        debugPrint('✅ [PHONE_INPUT] OTP sent, moving to OTP input screen');
+        Navigator.of(context).pushReplacementNamed(
+          '/otp-input',
+          arguments: {'phoneNumber': formattedPhone},
+        );
+      }
+    } on AuthException catch (e) {
+      debugPrint('🔴 [PHONE_INPUT] Error: ${e.message}');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _isLoading = false);
+      }
     } catch (e) {
       debugPrint('🔴 [PHONE_INPUT] Error: $e');
       if (mounted) {

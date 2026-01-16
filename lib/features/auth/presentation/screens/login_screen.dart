@@ -51,12 +51,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isLoading = true);
     try {
-      await AuthService.signInWithGoogle();
-
-      if (mounted) {
-        // Navigate directly to home
-        Navigator.of(context).pushReplacementNamed('/home');
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Google sign-in not available in this version'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      setState(() => _isLoading = false);
+      return;
     } on AuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(

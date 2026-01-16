@@ -70,10 +70,7 @@ class _SignupScreenState extends State<SignupScreen> {
         debugPrint('🟢 [SIGNUP] Navigating to email verification screen');
         Navigator.of(context).pushReplacementNamed(
           '/email-verification',
-          arguments: {
-            'user': credential.user,
-            'email': credential.user?.email ?? '',
-          },
+          arguments: {'email': credential.email},
         );
       }
     } on AuthException catch (e) {
@@ -135,44 +132,19 @@ class _SignupScreenState extends State<SignupScreen> {
     try {
       debugPrint('🟢 [GOOGLE_SIGNUP] Starting Google Sign-Up');
 
-      // Use AuthService for Google sign-in
-      final credential = await AuthService.signInWithGoogle();
-
-      debugPrint('✅ [GOOGLE_SIGNUP] Successfully signed in with Google');
-
-      if (mounted) {
-        // Navigate to email verification instead of home
-        Navigator.of(context).pushReplacementNamed(
-          '/email-verification',
-          arguments: {
-            'user': credential.user,
-            'email': credential.user?.email ?? '',
-          },
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      debugPrint(
-        '🔴 [GOOGLE_SIGNUP] FirebaseAuthException: ${e.code} - ${e.message}',
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Google sign-up not available in this version'),
+          backgroundColor: Colors.orange,
+        ),
       );
+      setState(() => _isLoading = false);
+      return;
+    } on AuthException catch (e) {
+      debugPrint('🔴 [GOOGLE_SIGNUP] AuthException: ${e.code} - ${e.message}');
 
       if (mounted) {
-        String errorMessage = 'Google sign-up failed: ${e.message}';
-
-        switch (e.code) {
-          case 'account-exists-with-different-credential':
-            errorMessage =
-                'An account already exists with this email. Try signing in instead.';
-            break;
-          case 'invalid-credential':
-            errorMessage = 'Invalid credential received from Google.';
-            break;
-          case 'operation-not-allowed':
-            errorMessage = 'Google sign-up is not enabled.';
-            break;
-          case 'user-disabled':
-            errorMessage = 'This user account has been disabled.';
-            break;
-        }
+        String errorMessage = e.message;
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

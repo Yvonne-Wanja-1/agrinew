@@ -50,7 +50,7 @@ class _AuthGateState extends State<AuthGate> {
       debugPrint(
         '🟢 [AUTH_GATE] User not verified, showing Email Verification',
       );
-      return EmailVerificationScreen(user: user, email: user.email);
+      return EmailVerificationScreen(email: user.email);
     }
   }
 }

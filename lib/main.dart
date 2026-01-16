@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/router/app_router.dart';
 import 'core/services/notification_service.dart';
@@ -9,12 +11,22 @@ import 'core/services/settings_service.dart';
 import 'core/services/local_notification_service.dart';
 import 'core/services/connectivity_service.dart';
 import 'core/services/auth_service.dart';
-import 'core/services/supabase_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize all services
+  // ✅ Load env FIRST
+  await dotenv.load(fileName: ".env");
+
+  // ✅ Init Supabase EARLY and loudly (no silent fallback for now)
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL'] ?? '',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+  );
+
+  debugPrint('✅ SUPABASE connected');
+
+  // Initialize other services
   await NotificationService.initialize();
   await NotificationService.requestPermissions();
   await LocalStorageService.initialize();
@@ -22,15 +34,6 @@ void main() async {
   await LocalNotificationService().initialize();
   await ConnectivityService().initialize();
   await AuthService.initialize();
-
-  // Initialize Supabase (handles initialization errors gracefully)
-  try {
-    await SupabaseService.initialize();
-  } catch (e) {
-    debugPrint(
-      '⚠️ [MAIN] Supabase initialization failed (will use local storage only): $e',
-    );
-  }
 
   // ✅ SINGLE source of truth
   final settingsService = SettingsService();
@@ -54,15 +57,10 @@ class AgriClinicHubApp extends StatelessWidget {
         return MaterialApp(
           title: 'Agri Clinic Hub',
           debugShowCheckedModeBanner: false,
-
-          // 🌗 THEMES
           theme: settingsService.getLightTheme(),
           darkTheme: settingsService.getDarkTheme(),
-          themeMode: settingsService.darkModeEnabled
-              ? ThemeMode.dark
-              : ThemeMode.light,
-
-          // 🧭 ROUTING
+          themeMode:
+              settingsService.darkModeEnabled ? ThemeMode.dark : ThemeMode.light,
           onGenerateRoute: AppRouter.generateRoute,
           initialRoute: AppRouter.login,
         );

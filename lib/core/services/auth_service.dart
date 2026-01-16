@@ -271,6 +271,48 @@ class AuthService {
     }
   }
 
+  // Reset password with email and new password
+  static Future<bool> resetPassword({
+    required String email,
+    required String newPassword,
+  }) async {
+    try {
+      email = email.trim().toLowerCase();
+      newPassword = newPassword.trim();
+
+      if (newPassword.isEmpty) {
+        throw AuthException(
+          code: 'invalid-password',
+          message: 'Password cannot be empty',
+        );
+      }
+
+      if (newPassword.length < 6) {
+        throw AuthException(
+          code: 'weak-password',
+          message: 'Password must be at least 6 characters',
+        );
+      }
+
+      if (!_userExists(email)) {
+        throw AuthException(
+          code: 'user-not-found',
+          message: 'No user found with this email',
+        );
+      }
+
+      // Hash and store new password
+      final hashedPassword = _hashPassword(newPassword);
+      await _prefs.setString('user_password_$email', hashedPassword);
+
+      debugPrint('✅ [AUTH_SERVICE] Password reset successfully for: $email');
+      return true;
+    } catch (e) {
+      debugPrint('❌ [AUTH_SERVICE] Password reset failed: $e');
+      rethrow;
+    }
+  }
+
   // Listen to auth state changes
   static Stream<LocalUser?> authStateChanges() {
     return Stream.periodic(Duration(milliseconds: 500), (_) => _currentUser);

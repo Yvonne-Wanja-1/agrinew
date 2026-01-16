@@ -3,6 +3,7 @@ import '../../features/auth/presentation/widgets/auth_gate.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/delete_account_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/disease_detection/presentation/screens/scan_screen.dart';
 import '../../features/disease_detection/presentation/screens/scan_result_screen.dart';
@@ -22,6 +23,7 @@ class AppRouter {
   static const String splash = '/';
   static const String login = '/login';
   static const String register = '/register';
+  static const String forgotPassword = '/forgot-password';
   static const String deleteAccount = '/delete-account';
   static const String home = '/home';
   static const String scan = '/scan';
@@ -45,6 +47,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case AppRouter.register:
         return MaterialPageRoute(builder: (_) => const RegisterScreen());
+      case AppRouter.forgotPassword:
+        return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
       case AppRouter.deleteAccount:
         return MaterialPageRoute(builder: (_) => const DeleteAccountScreen());
       case AppRouter.home:

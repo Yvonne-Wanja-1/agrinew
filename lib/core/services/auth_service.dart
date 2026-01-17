@@ -192,10 +192,11 @@ class AuthService {
         );
       }
 
-      // Sign up with Supabase Auth
+      // Sign up with Supabase Auth with email redirect
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
+        emailRedirectTo: 'agriclinichub://login',
       );
 
       final user = response.user;

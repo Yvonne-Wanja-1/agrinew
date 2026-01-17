@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "591444926690",
+    "project_id": "agriclinichub",
+    "storage_bucket": "agriclinichub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591444926690:android:085debc7e4248304e7febb",
+        "android_client_info": {
+          "package_name": "com.example.agriclinichub_fresh"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "591444926690-cdcutmnqbs2dr53do4k5dcv8j72g3lfi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.agriclinichub_fresh",
+            "certificate_hash": "1e739b8602ef0acc4e61a3a462d2d504d5f16bc9"
+          }
+        },
+        {
+          "client_id": "591444926690-8ctidk7pqlla8lavhgac3h3q48ui23o4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdpdMv6kqKKalmyIuqq_gHFVPinFVKzHQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "591444926690-8ctidk7pqlla8lavhgac3h3q48ui23o4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "591444926690-s0j1fos4me4bc5fo1673v1q07n8kpiha.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.agriclinichubNew"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591444926690:android:4b316e6ad8907904e7febb",
+        "android_client_info": {
+          "package_name": "com.example.agriclinichub_new"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "591444926690-8ctidk7pqlla8lavhgac3h3q48ui23o4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdpdMv6kqKKalmyIuqq_gHFVPinFVKzHQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "591444926690-8ctidk7pqlla8lavhgac3h3q48ui23o4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "591444926690-s0j1fos4me4bc5fo1673v1q07n8kpiha.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.agriclinichubNew"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -21,7 +21,11 @@ class _ScanScreenState extends State<ScanScreen> {
         imageQuality: 90,
       );
       if (image != null && mounted) {
-        Navigator.pushNamed(context, '/scan-result', arguments: image.path);
+        Navigator.pushNamed(
+          context,
+          '/scan-result',
+          arguments: {'imagePath': image.path},
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -42,7 +46,11 @@ class _ScanScreenState extends State<ScanScreen> {
         imageQuality: 90,
       );
       if (image != null && mounted) {
-        Navigator.pushNamed(context, '/scan-result', arguments: image.path);
+        Navigator.pushNamed(
+          context,
+          '/scan-result',
+          arguments: {'imagePath': image.path},
+        );
       }
     } catch (e) {
       if (mounted) {

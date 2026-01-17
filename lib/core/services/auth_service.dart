@@ -1,21 +1,26 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 
-/// User model for local authentication
+/// User model (mirrors Supabase auth.users + farmers profile)
 class LocalUser {
   final String uid;
   final String email;
   final bool emailVerified;
+  final String? fullName;
   final String? phoneNumber;
   final bool phoneVerified;
+  final String? county;
 
   LocalUser({
     required this.uid,
     required this.email,
     this.emailVerified = false,
+    this.fullName,
     this.phoneNumber,
     this.phoneVerified = false,
+    this.county,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,8 +28,10 @@ class LocalUser {
       'uid': uid,
       'email': email,
       'emailVerified': emailVerified,
+      'fullName': fullName,
       'phoneNumber': phoneNumber,
       'phoneVerified': phoneVerified,
+      'county': county,
     };
   }
 
@@ -33,8 +40,10 @@ class LocalUser {
       uid: map['uid'] ?? '',
       email: map['email'] ?? '',
       emailVerified: map['emailVerified'] ?? false,
+      fullName: map['fullName'],
       phoneNumber: map['phoneNumber'],
       phoneVerified: map['phoneVerified'] ?? false,
+      county: map['county'],
     );
   }
 
@@ -42,15 +51,19 @@ class LocalUser {
     String? uid,
     String? email,
     bool? emailVerified,
+    String? fullName,
     String? phoneNumber,
     bool? phoneVerified,
+    String? county,
   }) {
     return LocalUser(
       uid: uid ?? this.uid,
       email: email ?? this.email,
       emailVerified: emailVerified ?? this.emailVerified,
+      fullName: fullName ?? this.fullName,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       phoneVerified: phoneVerified ?? this.phoneVerified,
+      county: county ?? this.county,
     );
   }
 }
@@ -66,27 +79,82 @@ class AuthException implements Exception {
   String toString() => 'AuthException($code): $message';
 }
 
-/// Local Authentication Service - replaces Firebase Auth
-/// Stores user accounts and authentication state in local storage
+/// Supabase Authentication Service
+/// Uses Supabase Auth for identity + farmers table for profile
 class AuthService {
   static late SharedPreferences _prefs;
   static LocalUser? _currentUser;
   static final List<Function(LocalUser?)> _listeners = [];
+  static late SupabaseClient _supabase;
 
   // Initialize the service
   static Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
-    _loadCurrentUser();
+    _supabase = Supabase.instance.client;
+
+    // Check if user is already logged in via Supabase session
+    final session = _supabase.auth.currentSession;
+    if (session != null) {
+      await _loadUserFromSupabase(session.user.id);
+    } else {
+      _currentUser = null;
+    }
+
+    // Listen to auth state changes
+    _supabase.auth.onAuthStateChange.listen((data) {
+      final AuthChangeEvent event = data.event;
+      final Session? session = data.session;
+
+      if (event == AuthChangeEvent.signedIn && session != null) {
+        _loadUserFromSupabase(session.user.id);
+      } else if (event == AuthChangeEvent.signedOut) {
+        _currentUser = null;
+        _prefs.remove('current_user');
+        _notifyListeners();
+      }
+    });
+
+    debugPrint('✅ [AUTH_SERVICE] Initialized with Supabase Auth');
   }
 
-  // Load current user from local storage
-  static void _loadCurrentUser() {
-    final userJson = _prefs.getString('current_user');
-    if (userJson != null) {
-      _currentUser = LocalUser.fromMap(jsonDecode(userJson));
-      debugPrint(
-        '✅ [AUTH_SERVICE] Current user loaded: ${_currentUser?.email}',
-      );
+  // Load user from Supabase and cache locally
+  static Future<void> _loadUserFromSupabase(String uid) async {
+    try {
+      final response = await _supabase
+          .from('farmers')
+          .select()
+          .eq('user_id', uid)
+          .single();
+
+      final supabaseUser = _supabase.auth.currentUser;
+      if (supabaseUser != null) {
+        _currentUser = LocalUser(
+          uid: uid,
+          email: supabaseUser.email ?? '',
+          emailVerified: supabaseUser.emailConfirmedAt != null,
+          fullName: response['full_name'],
+          phoneNumber: response['phone'],
+          phoneVerified: false,
+          county: response['county'],
+        );
+
+        await _saveCurrentUser();
+        _notifyListeners();
+        debugPrint('✅ [AUTH_SERVICE] User loaded: ${_currentUser?.email}');
+      }
+    } catch (e) {
+      debugPrint('⚠️ [AUTH_SERVICE] Failed to load user from Supabase: $e');
+      // Still keep the user logged in, just without profile data yet
+      final supabaseUser = _supabase.auth.currentUser;
+      if (supabaseUser != null) {
+        _currentUser = LocalUser(
+          uid: uid,
+          email: supabaseUser.email ?? '',
+          emailVerified: supabaseUser.emailConfirmedAt != null,
+        );
+        await _saveCurrentUser();
+        _notifyListeners();
+      }
     }
   }
 
@@ -109,12 +177,14 @@ class AuthService {
   static Future<LocalUser> signUpWithEmail({
     required String email,
     required String password,
+    String? fullName,
+    String? phoneNumber,
+    String? county,
   }) async {
     try {
       email = email.trim().toLowerCase();
       password = password.trim();
 
-      // Validate inputs
       if (email.isEmpty || password.isEmpty) {
         throw AuthException(
           code: 'invalid-input',
@@ -122,33 +192,39 @@ class AuthService {
         );
       }
 
-      // Check if email already exists
-      if (_userExists(email)) {
+      // Sign up with Supabase Auth
+      final response = await _supabase.auth.signUp(
+        email: email,
+        password: password,
+      );
+
+      final user = response.user;
+      if (user == null) {
         throw AuthException(
-          code: 'email-already-in-use',
-          message: 'Email already in use. Please try another email.',
+          code: 'signup-failed',
+          message: 'Failed to create user',
         );
       }
 
-      // Create new user
-      final uid = _generateUID();
-      final hashedPassword = _hashPassword(password);
+      // Create farmer profile in farmers table
+      await _supabase.from('farmers').insert({
+        'user_id': user.id,
+        'email': email,
+        'full_name': fullName ?? '',
+        'phone': phoneNumber,
+        'county': county,
+      });
 
-      final user = LocalUser(uid: uid, email: email, emailVerified: false);
-
-      // Store user credentials and profile
-      await _storeUserCredentials(email, hashedPassword);
-      await _storeUserProfile(user);
-
-      _currentUser = user;
-      await _saveCurrentUser();
-      _notifyListeners();
+      // Load user from Supabase
+      await _loadUserFromSupabase(user.id);
 
       debugPrint('✅ [AUTH_SERVICE] User signed up: $email');
-      return user;
+      return _currentUser!;
+    } on AuthException {
+      rethrow;
     } catch (e) {
       debugPrint('❌ [AUTH_SERVICE] Sign up failed: $e');
-      rethrow;
+      throw AuthException(code: 'signup-error', message: e.toString());
     }
   }
 
@@ -161,39 +237,34 @@ class AuthService {
       email = email.trim().toLowerCase();
       password = password.trim();
 
-      // Retrieve user
-      final userJson = _prefs.getString('user_profile_$email');
-      if (userJson == null) {
-        throw AuthException(
-          code: 'user-not-found',
-          message: 'No user found with this email',
-        );
+      // Sign in with Supabase Auth
+      final response = await _supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      final user = response.user;
+      if (user == null) {
+        throw AuthException(code: 'login-failed', message: 'Failed to sign in');
       }
 
-      // Verify password
-      final storedHash = _prefs.getString('user_password_$email');
-      if (storedHash == null || !_verifyPassword(password, storedHash)) {
-        throw AuthException(
-          code: 'wrong-password',
-          message: 'Invalid password',
-        );
-      }
-
-      _currentUser = LocalUser.fromMap(jsonDecode(userJson));
-      await _saveCurrentUser();
-      _notifyListeners();
+      // Load user from Supabase
+      await _loadUserFromSupabase(user.id);
 
       debugPrint('✅ [AUTH_SERVICE] User logged in: $email');
       return _currentUser!;
+    } on AuthException {
+      rethrow;
     } catch (e) {
       debugPrint('❌ [AUTH_SERVICE] Login failed: $e');
-      rethrow;
+      throw AuthException(code: 'login-error', message: e.toString());
     }
   }
 
   // Logout
   static Future<void> logout() async {
     try {
+      await _supabase.auth.signOut();
       _currentUser = null;
       await _prefs.remove('current_user');
       _notifyListeners();
@@ -213,28 +284,20 @@ class AuthService {
         throw AuthException(code: 'no-user', message: 'No user logged in');
       }
 
-      final email = _currentUser!.email;
+      // Delete user from Supabase Auth (this also cascades to farmers table via FK)
+      await _supabase.auth.admin.deleteUser(_currentUser!.uid);
 
-      // Verify password before deletion
-      final storedHash = _prefs.getString('user_password_$email');
-      if (storedHash == null || !_verifyPassword(password, storedHash)) {
-        throw AuthException(
-          code: 'wrong-password',
-          message: 'Invalid password',
-        );
-      }
-
-      // Delete user data
-      await _prefs.remove('user_profile_$email');
-      await _prefs.remove('user_password_$email');
       _currentUser = null;
       await _prefs.remove('current_user');
       _notifyListeners();
 
-      debugPrint('✅ [AUTH_SERVICE] Account deleted: $email');
+      debugPrint('✅ [AUTH_SERVICE] Account deleted: ${_currentUser?.email}');
     } catch (e) {
       debugPrint('❌ [AUTH_SERVICE] Account deletion failed: $e');
-      rethrow;
+      throw AuthException(
+        code: 'delete-account-failed',
+        message: 'Failed to delete account: $e',
+      );
     }
   }
 
@@ -243,26 +306,12 @@ class AuthService {
     return _currentUser?.email;
   }
 
-  // Send password reset email (local implementation)
+  // Send password reset email
   static Future<void> sendPasswordResetEmail({required String email}) async {
     try {
       email = email.trim().toLowerCase();
-
-      if (!_userExists(email)) {
-        throw AuthException(
-          code: 'user-not-found',
-          message: 'No user found with this email',
-        );
-      }
-
-      // In production, you would send an actual email here
-      // For now, we'll just mark the user for password reset
-      await _prefs.setString(
-        'password_reset_requested_$email',
-        DateTime.now().toIso8601String(),
-      );
-
-      debugPrint('✅ [AUTH_SERVICE] Password reset requested for: $email');
+      await _supabase.auth.resetPasswordForEmail(email);
+      debugPrint('✅ [AUTH_SERVICE] Password reset email sent to: $email');
     } catch (e) {
       throw AuthException(
         code: 'reset-email-failed',
@@ -271,7 +320,7 @@ class AuthService {
     }
   }
 
-  // Reset password with email and new password
+  // Reset password (after user receives reset email)
   static Future<bool> resetPassword({
     required String email,
     required String newPassword,
@@ -294,18 +343,9 @@ class AuthService {
         );
       }
 
-      if (!_userExists(email)) {
-        throw AuthException(
-          code: 'user-not-found',
-          message: 'No user found with this email',
-        );
-      }
-
-      // Hash and store new password
-      final hashedPassword = _hashPassword(newPassword);
-      await _prefs.setString('user_password_$email', hashedPassword);
-
-      debugPrint('✅ [AUTH_SERVICE] Password reset successfully for: $email');
+      // Send reset email via Supabase
+      await _supabase.auth.resetPasswordForEmail(email);
+      debugPrint('✅ [AUTH_SERVICE] Password reset email sent for: $email');
       return true;
     } catch (e) {
       debugPrint('❌ [AUTH_SERVICE] Password reset failed: $e');
@@ -415,7 +455,6 @@ class AuthService {
       if (_currentUser != null) {
         _currentUser = _currentUser!.copyWith(emailVerified: true);
         await _saveCurrentUser();
-        await _storeUserProfile(_currentUser!);
         _notifyListeners();
         debugPrint('✅ [AUTH_SERVICE] Email marked as verified');
       }
@@ -441,7 +480,17 @@ class AuthService {
           phoneVerified: true,
         );
         await _saveCurrentUser();
-        await _storeUserProfile(_currentUser!);
+
+        // Update in farmers table
+        try {
+          await _supabase
+              .from('farmers')
+              .update({'phone': phoneNumber})
+              .eq('user_id', _currentUser!.uid);
+        } catch (e) {
+          debugPrint('⚠️ [AUTH_SERVICE] Failed to update phone in farmers: $e');
+        }
+
         _notifyListeners();
         debugPrint('✅ [AUTH_SERVICE] Phone marked as verified');
       }
@@ -454,46 +503,6 @@ class AuthService {
   }
 
   // === Helper Methods ===
-
-  static bool _userExists(String email) {
-    return _prefs.containsKey('user_profile_${email.toLowerCase()}');
-  }
-
-  static String _generateUID() {
-    return 'local_${DateTime.now().millisecondsSinceEpoch}_${(DateTime.now().microsecond % 10000)}';
-  }
-
-  static String _hashPassword(String password) {
-    // Simple hash using base64 (for demo purposes only)
-    // In production, use a proper password hashing library like bcrypt
-    return base64Encode(utf8.encode(password));
-  }
-
-  static bool _verifyPassword(String password, String hash) {
-    try {
-      final decoded = utf8.decode(base64Decode(hash));
-      return decoded == password;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  static Future<void> _storeUserCredentials(
-    String email,
-    String passwordHash,
-  ) async {
-    await _prefs.setString(
-      'user_password_${email.toLowerCase()}',
-      passwordHash,
-    );
-  }
-
-  static Future<void> _storeUserProfile(LocalUser user) async {
-    await _prefs.setString(
-      'user_profile_${user.email.toLowerCase()}',
-      jsonEncode(user.toMap()),
-    );
-  }
 
   static Future<void> _saveCurrentUser() async {
     if (_currentUser != null) {

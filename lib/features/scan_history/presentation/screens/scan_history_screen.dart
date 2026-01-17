@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:agriclinichub_new/core/services/local_storage_service.dart';
 
 class ScanHistoryScreen extends StatefulWidget {
   const ScanHistoryScreen({Key? key}) : super(key: key);
@@ -11,54 +12,108 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
   late TextEditingController _searchController;
   String _selectedFilter = 'All';
   bool _showFilters = false;
-
-  final List<Map<String, dynamic>> _scans = [
-    {
-      'date': 'Dec 3, 2025',
-      'crop': 'Tomato',
-      'status': 'Healthy',
-      'statusColor': Colors.green,
-      'confidence': 98,
-      'cropIcon': Icons.local_florist,
-    },
-    {
-      'date': 'Dec 1, 2025',
-      'crop': 'Maize',
-      'status': 'Early Blight',
-      'statusColor': Colors.orange,
-      'confidence': 85,
-      'cropIcon': Icons.grass,
-    },
-    {
-      'date': 'Nov 28, 2025',
-      'crop': 'Potato',
-      'status': 'Healthy',
-      'statusColor': Colors.green,
-      'confidence': 94,
-      'cropIcon': Icons.agriculture,
-    },
-    {
-      'date': 'Nov 25, 2025',
-      'crop': 'Rice',
-      'status': 'Leaf Spot',
-      'statusColor': Colors.red,
-      'confidence': 76,
-      'cropIcon': Icons.grass,
-    },
-    {
-      'date': 'Nov 22, 2025',
-      'crop': 'Pepper',
-      'status': 'Healthy',
-      'statusColor': Colors.green,
-      'confidence': 92,
-      'cropIcon': Icons.local_florist,
-    },
-  ];
+  late List<Map<String, dynamic>> _scans;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
+    _loadScans();
+  }
+
+  void _loadScans() {
+    // Get scans from local storage
+    final localScans = LocalStorageService.getAllScans();
+
+    // Add default sample data if no scans exist
+    if (localScans.isEmpty) {
+      _scans = [
+        {
+          'date': 'Dec 3, 2025',
+          'crop': 'Tomato',
+          'status': 'Healthy',
+          'statusColor': Colors.green,
+          'confidence': 98,
+          'cropIcon': Icons.local_florist,
+        },
+        {
+          'date': 'Dec 1, 2025',
+          'crop': 'Maize',
+          'status': 'Early Blight',
+          'statusColor': Colors.orange,
+          'confidence': 85,
+          'cropIcon': Icons.grass,
+        },
+        {
+          'date': 'Nov 28, 2025',
+          'crop': 'Potato',
+          'status': 'Healthy',
+          'statusColor': Colors.green,
+          'confidence': 94,
+          'cropIcon': Icons.agriculture,
+        },
+        {
+          'date': 'Nov 25, 2025',
+          'crop': 'Rice',
+          'status': 'Leaf Spot',
+          'statusColor': Colors.red,
+          'confidence': 76,
+          'cropIcon': Icons.grass,
+        },
+        {
+          'date': 'Nov 22, 2025',
+          'crop': 'Pepper',
+          'status': 'Healthy',
+          'statusColor': Colors.green,
+          'confidence': 92,
+          'cropIcon': Icons.local_florist,
+        },
+      ];
+    } else {
+      // Convert local scans to display format and sort by timestamp
+      _scans = localScans
+          .map((scan) {
+            final statusColor = _getStatusColor(scan['status']);
+            return {
+              'date': scan['date'] ?? 'Unknown',
+              'crop': scan['crop'] ?? 'Unknown',
+              'status': scan['status'] ?? 'Unknown',
+              'statusColor': statusColor,
+              'confidence': scan['confidence'] ?? 0,
+              'cropIcon': Icons.local_florist,
+              'imagePath': scan['imagePath'],
+            };
+          })
+          .toList()
+          .cast<Map<String, dynamic>>();
+
+      // Sort by timestamp (newest first)
+      _scans.sort((a, b) {
+        final aTime = a['timestamp'] ?? 0;
+        final bTime = b['timestamp'] ?? 0;
+        return bTime.compareTo(aTime);
+      });
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    if (status.toLowerCase().contains('healthy')) {
+      return Colors.green;
+    } else if (status.toLowerCase().contains('warning') ||
+        status.toLowerCase().contains('early')) {
+      return Colors.orange;
+    } else {
+      return Colors.red;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reload scans when returning to this screen
+    _loadScans();
+    // Trigger a rebuild
+    setState(() {});
   }
 
   @override

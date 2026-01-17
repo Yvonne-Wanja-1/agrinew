@@ -59,10 +59,11 @@ class AgriClinicHubApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: settingsService.getLightTheme(),
           darkTheme: settingsService.getDarkTheme(),
-          themeMode:
-              settingsService.darkModeEnabled ? ThemeMode.dark : ThemeMode.light,
+          themeMode: settingsService.darkModeEnabled
+              ? ThemeMode.dark
+              : ThemeMode.light,
           onGenerateRoute: AppRouter.generateRoute,
-          initialRoute: AppRouter.login,
+          initialRoute: AppRouter.splash,
         );
       },
     );

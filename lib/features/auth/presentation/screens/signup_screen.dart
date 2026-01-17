@@ -30,7 +30,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   /// Sign up with email and password using AuthService
-  /// - Uses Firebase Auth only (no database)
+  /// - Uses Supabase Auth with farmers profile
   /// - Handles errors properly
   /// - Prevents duplicate signup calls
   Future<void> _handleSignup() async {
@@ -55,13 +55,19 @@ class _SignupScreenState extends State<SignupScreen> {
     try {
       final email = _emailController.text.trim();
       final password = _passwordController.text.trim();
+      final fullName = _nameController.text.trim();
+      final phoneNumber = _phoneController.text.trim();
+      final county = _farmNameController.text.trim();
 
       debugPrint('🟢 [SIGNUP] Attempting to create user with email: $email');
 
-      // Use AuthService for Firebase Auth
+      // Use AuthService for Supabase Auth with farmer profile
       final credential = await AuthService.signUpWithEmail(
         email: email,
         password: password,
+        fullName: fullName,
+        phoneNumber: phoneNumber,
+        county: county,
       );
 
       debugPrint('✅ [SIGNUP] User created successfully');
@@ -122,54 +128,6 @@ class _SignupScreenState extends State<SignupScreen> {
         _isSignupInProgress = false;
         setState(() => _isLoading = false);
         debugPrint('🟢 [SIGNUP] Signup flow completed, state reset');
-      }
-    }
-  }
-
-  /// Sign up with Google using AuthService
-  Future<void> _handleGoogleSignUp() async {
-    setState(() => _isLoading = true);
-    try {
-      debugPrint('🟢 [GOOGLE_SIGNUP] Starting Google Sign-Up');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Google sign-up not available in this version'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      setState(() => _isLoading = false);
-      return;
-    } on AuthException catch (e) {
-      debugPrint('🔴 [GOOGLE_SIGNUP] AuthException: ${e.code} - ${e.message}');
-
-      if (mounted) {
-        String errorMessage = e.message;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red.shade600,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint('🔴 [GOOGLE_SIGNUP] Unexpected error: $e');
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('An unexpected error occurred: $e'),
-            backgroundColor: Colors.red.shade600,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        debugPrint('🟢 [GOOGLE_SIGNUP] Google Sign-Up flow completed');
       }
     }
   }

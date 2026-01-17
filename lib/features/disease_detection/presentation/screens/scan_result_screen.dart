@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:agriclinichub_new/core/services/local_storage_service.dart';
+import 'package:uuid/uuid.dart';
+import 'package:intl/intl.dart';
 
 class ScanResultScreen extends StatefulWidget {
   final String imagePath;
@@ -12,6 +15,7 @@ class ScanResultScreen extends StatefulWidget {
 
 class _ScanResultScreenState extends State<ScanResultScreen> {
   bool _isLoading = true;
+  late Map<String, dynamic> _scanResult;
 
   @override
   void initState() {
@@ -22,7 +26,61 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
   Future<void> _performAnalysis() async {
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
+      // Generate mock scan result data
+      _scanResult = {
+        'crop': 'Tomato',
+        'status': 'Early Blight',
+        'disease': 'Early Blight',
+        'confidence': 94,
+        'description':
+            'Early Blight is a fungal disease that primarily affects tomato and potato plants. It causes brown spots with concentric rings on the leaves and stems.',
+      };
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _saveToHistory() async {
+    try {
+      const uuid = Uuid();
+      final scanId = uuid.v4();
+      final now = DateTime.now();
+      final dateFormatter = DateFormat('MMM d, yyyy');
+
+      final scanData = {
+        'id': scanId,
+        'imagePath': widget.imagePath,
+        'date': dateFormatter.format(now),
+        'crop': _scanResult['crop'] ?? 'Unknown',
+        'status': _scanResult['status'] ?? 'Unknown',
+        'confidence': _scanResult['confidence'] ?? 0,
+        'cropIcon': Icons.local_florist.codePoint,
+        'timestamp': now.millisecondsSinceEpoch,
+      };
+
+      await LocalStorageService.saveScanLocally(scanId, scanData);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Result saved to history!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // Navigate back to history after a short delay
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) {
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil('/history', (route) => route.isFirst);
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving result: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -219,13 +277,7 @@ class _ScanResultScreenState extends State<ScanResultScreen> {
                           width: double.infinity,
                           height: 50,
                           child: OutlinedButton.icon(
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Result saved to history!'),
-                                ),
-                              );
-                            },
+                            onPressed: _saveToHistory,
                             icon: const Icon(Icons.bookmark_border),
                             label: const Text('Save to History'),
                             style: OutlinedButton.styleFrom(

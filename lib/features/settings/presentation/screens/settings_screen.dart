@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/services/settings_service.dart';
+import '../../../../core/services/auth_service.dart';
+import '../../../../core/router/app_router.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -323,18 +325,33 @@ class SettingsScreen extends StatelessWidget {
   void _handleLogout(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Logout'),
         content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.of(context).pushReplacementNamed('/login');
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              try {
+                // Call AuthService to logout and clear session
+                await AuthService.logout();
+                if (context.mounted) {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    AppRouter.login,
+                    (route) => false,
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
+                }
+              }
             },
             child: const Text('Logout', style: TextStyle(color: Colors.red)),
           ),

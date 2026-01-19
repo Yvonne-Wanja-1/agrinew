@@ -37,15 +37,6 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     try {
       await _emailOtpService.sendEmailOtp(email: widget.email);
       debugPrint('✅ [EMAIL_VERIFICATION] OTP sent successfully');
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('4-digit code sent to your email. Check inbox.'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
     } catch (e) {
       debugPrint('🔴 [EMAIL_VERIFICATION] Error sending OTP: $e');
       if (mounted) {

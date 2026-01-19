@@ -205,12 +205,24 @@ class AuthService {
       }
 
       // ✅ Load auth user info (no farmers profile yet)
-      await _loadUserFromSupabase(user.id);
+      _currentUser = LocalUser(
+        uid: user.id,
+        email: user.email ?? email,
+        emailVerified: user.emailConfirmedAt != null,
+      );
+      await _saveCurrentUser();
+      _notifyListeners();
 
       debugPrint('✅ [AUTH_SERVICE] User signed up: $email');
       debugPrint(
         '🟡 [AUTH_SERVICE] Farmer profile will be created on first login',
       );
+      if (_currentUser == null) {
+        throw AuthException(
+          code: 'signup-failed',
+          message: 'Failed to load user after signup',
+        );
+      }
       return _currentUser!;
     } on AuthException {
       rethrow;

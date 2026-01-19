@@ -177,9 +177,6 @@ class AuthService {
   static Future<LocalUser> signUpWithEmail({
     required String email,
     required String password,
-    String? fullName,
-    String? phoneNumber,
-    String? county,
   }) async {
     try {
       email = email.trim().toLowerCase();
@@ -192,7 +189,7 @@ class AuthService {
         );
       }
 
-      // Sign up with Supabase Auth with email redirect
+      // ✅ ONLY create auth user - DO NOT touch farmers table
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
@@ -207,19 +204,13 @@ class AuthService {
         );
       }
 
-      // Create farmer profile in farmers table
-      await _supabase.from('farmers').insert({
-        'user_id': user.id,
-        'email': email,
-        'full_name': fullName ?? '',
-        'phone': phoneNumber,
-        'county': county,
-      });
-
-      // Load user from Supabase
+      // ✅ Load auth user info (no farmers profile yet)
       await _loadUserFromSupabase(user.id);
 
       debugPrint('✅ [AUTH_SERVICE] User signed up: $email');
+      debugPrint(
+        '🟡 [AUTH_SERVICE] Farmer profile will be created on first login',
+      );
       return _currentUser!;
     } on AuthException {
       rethrow;
@@ -249,8 +240,11 @@ class AuthService {
         throw AuthException(code: 'login-failed', message: 'Failed to sign in');
       }
 
-      // Load user from Supabase
+      // ✅ NOW user is authenticated → auth.uid() exists
       await _loadUserFromSupabase(user.id);
+
+      // ✅ CREATE farmers profile if it doesn't exist
+      await _ensureFarmerProfileExists(user.id, email);
 
       debugPrint('✅ [AUTH_SERVICE] User logged in: $email');
       return _currentUser!;
@@ -259,6 +253,39 @@ class AuthService {
     } catch (e) {
       debugPrint('❌ [AUTH_SERVICE] Login failed: $e');
       throw AuthException(code: 'login-error', message: e.toString());
+    }
+  }
+
+  // ✅ Ensure farmer profile exists (called after successful login)
+  static Future<void> _ensureFarmerProfileExists(
+    String userId,
+    String email,
+  ) async {
+    try {
+      final existing = await _supabase
+          .from('farmers')
+          .select('id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      if (existing != null) {
+        debugPrint(
+          '🟢 [AUTH_SERVICE] Farmer profile already exists for $userId',
+        );
+        return; // Profile already exists
+      }
+
+      // Create new farmer profile
+      await _supabase.from('farmers').insert({
+        'user_id': userId,
+        'email': email,
+        'full_name': 'New User',
+      });
+
+      debugPrint('✅ [AUTH_SERVICE] Farmer profile created for $userId');
+    } catch (e) {
+      debugPrint('🟡 [AUTH_SERVICE] Error creating farmer profile: $e');
+      // Don't rethrow - profile creation should not block login
     }
   }
 

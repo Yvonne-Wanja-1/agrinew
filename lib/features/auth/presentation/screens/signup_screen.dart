@@ -55,24 +55,26 @@ class _SignupScreenState extends State<SignupScreen> {
     try {
       final email = _emailController.text.trim();
       final password = _passwordController.text.trim();
-      final fullName = _nameController.text.trim();
-      final phoneNumber = _phoneController.text.trim();
-      final county = _farmNameController.text.trim();
 
       debugPrint('🟢 [SIGNUP] Attempting to create user with email: $email');
 
-      // Use AuthService for Supabase Auth with farmer profile
+      // ✅ ONLY create auth user (no farmers profile here)
       final credential = await AuthService.signUpWithEmail(
         email: email,
         password: password,
-        fullName: fullName,
-        phoneNumber: phoneNumber,
-        county: county,
       );
 
       debugPrint('✅ [SIGNUP] User created successfully');
 
       if (mounted) {
+        // Show message asking to check email
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Check your email to confirm your account'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 4),
+          ),
+        );
         debugPrint('🟢 [SIGNUP] Navigating to email verification screen');
         Navigator.of(context).pushReplacementNamed(
           '/email-verification',

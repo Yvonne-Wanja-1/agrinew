@@ -18,6 +18,12 @@ void main() async {
   // ✅ Load env FIRST
   await dotenv.load(fileName: ".env");
 
+  // 🔍 DEBUG: Verify env vars are loaded
+  debugPrint('🔍 SUPABASE_URL: ${dotenv.env['SUPABASE_URL']}');
+  debugPrint(
+    '🔍 SUPABASE_ANON_KEY: ${dotenv.env['SUPABASE_ANON_KEY'] != null ? 'LOADED ✅' : 'MISSING ❌'}',
+  );
+
   // ✅ Init Supabase EARLY and loudly (no silent fallback for now)
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL'] ?? '',
